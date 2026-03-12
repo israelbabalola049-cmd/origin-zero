@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ORIGIN: ZERO</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#1a1a1a; --surface:#222; --surface2:#2a2a2a; --surface3:#333;
+  --border:#3a3a3a; --orange:#e8630a; --orange-dim:#a84508;
+  --cyan:#00c9b1; --cyan-dim:#008f7d; --text:#e8e0d5; --text-dim:#9a9087;
+  --text-muted:#5a5550; --danger:#e84040; --success:#5ec96e; --gold:#d4a843;
+  --fd:'Bebas Neue',sans-serif; --fb:'DM Serif Display',serif; --fm:'JetBrains Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px;line-height:1.6;overflow:hidden}
+::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.screen{position:absolute;inset:0;display:none;animation:fadeIn .4s ease}
+.screen.active{display:flex}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+/* TITLE */
+#screen-title{flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 20% 50%,rgba(232,99,10,.08) 0%,transparent 60%),radial-gradient(ellipse at 80% 30%,rgba(0,201,177,.06) 0%,transparent 50%),var(--bg);
+  position:relative;overflow:hidden}
+#screen-title::before{content:'';position:absolute;inset:0;
+  background-image:linear-gradient(rgba(255,255,255,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.015) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none}
+.title-eyebrow{font-family:var(--fm);font-size:11px;letter-spacing:.3em;color:var(--cyan);text-transform:uppercase;margin-bottom:16px;animation:slideUp .6s ease .2s both}
+.title-logo{font-family:var(--fd);font-size:clamp(72px,10vw,120px);color:var(--text);letter-spacing:.05em;line-height:.9;text-align:center;animation:slideUp .6s ease .3s both}
+.title-logo span{color:var(--orange);display:block}
+.title-tagline{font-family:var(--fb);font-style:italic;font-size:18px;color:var(--text-dim);margin-top:20px;animation:slideUp .6s ease .4s both}
+.title-divider{width:80px;height:2px;background:linear-gradient(90deg,transparent,var(--orange),transparent);margin:40px auto;animation:slideUp .6s ease .5s both}
+.title-buttons{display:flex;flex-direction:column;gap:14px;animation:slideUp .6s ease .6s both}
+.title-version{position:absolute;bottom:24px;font-family:var(--fm);font-size:10px;color:var(--text-muted);letter-spacing:.2em;animation:slideUp .6s ease .8s both}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:14px 40px;border:none;border-radius:2px;font-family:var(--fd);font-size:20px;letter-spacing:.1em;cursor:pointer;transition:all .2s ease;position:relative;overflow:hidden}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--orange);color:#fff;min-width:260px}
+.btn-primary:hover{background:#ff7a20;box-shadow:0 0 30px rgba(232,99,10,.4)}
+.btn-secondary{background:transparent;color:var(--text-dim);border:1px solid var(--border);min-width:260px}
+.btn-secondary:hover{border-color:var(--cyan);color:var(--cyan)}
+.btn-secondary:disabled{opacity:.3;cursor:not-allowed}
+.btn-secondary:disabled:hover{border-color:var(--border);color:var(--text-dim)}
+.btn-choice{background:var(--surface2);color:var(--text);border:1px solid var(--border);text-align:left;justify-content:flex-start;padding:16px 20px;font-family:var(--fb);font-size:15px;letter-spacing:0;line-height:1.4;border-radius:4px;width:100%;transition:all .18s ease}
+.btn-choice:hover{border-color:var(--orange);background:var(--surface3);color:var(--orange);transform:translateX(4px)}
+.choice-letter{font-family:var(--fm);font-size:11px;color:var(--orange);font-weight:500;margin-right:12px;flex-shrink:0}
+.btn-age-up{background:linear-gradient(135deg,var(--orange),#c45a08);color:#fff;padding:18px 60px;font-size:22px;border-radius:2px;letter-spacing:.15em;box-shadow:0 4px 20px rgba(232,99,10,.3);min-width:200px}
+.btn-age-up:hover{box-shadow:0 4px 35px rgba(232,99,10,.5);transform:translateY(-1px)}
+.btn-age-up:disabled{background:var(--surface3);color:var(--text-muted);box-shadow:none;cursor:not-allowed;transform:none}
+
+/* CHARACTER CREATION */
+#screen-create{flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;overflow-y:auto;
+  background:radial-gradient(ellipse at 70% 20%,rgba(0,201,177,.05) 0%,transparent 50%),var(--bg)}
+.create-container{width:100%;max-width:640px;animation:slideUp .5s ease}
+.create-header{margin-bottom:40px}
+.create-header h2{font-family:var(--fd);font-size:42px;color:var(--text);letter-spacing:.05em}
+.create-header p{color:var(--text-dim);font-style:italic;margin-top:6px}
+.create-section{margin-bottom:28px}
+.create-section label{display:block;font-family:var(--fm);font-size:10px;letter-spacing:.25em;color:var(--cyan);text-transform:uppercase;margin-bottom:10px}
+.input-text{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:2px;color:var(--text);font-family:var(--fb);font-size:16px;padding:14px 16px;outline:none;transition:border-color .2s}
+.input-text:focus{border-color:var(--orange)}
+.select-grid{display:flex;gap:10px;flex-wrap:wrap}
+.select-option{flex:1;min-width:80px;padding:12px 10px;background:var(--surface);border:1px solid var(--border);border-radius:2px;color:var(--text-dim);font-family:var(--fm);font-size:12px;letter-spacing:.05em;cursor:pointer;text-align:center;transition:all .18s}
+.select-option:hover{border-color:var(--orange);color:var(--text)}
+.select-option.selected{border-color:var(--orange);background:rgba(232,99,10,.12);color:var(--orange)}
+.select-dropdown{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:2px;color:var(--text);font-family:var(--fb);font-size:15px;padding:14px 16px;outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='%239a9087'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;transition:border-color .2s}
+.select-dropdown:focus{border-color:var(--orange)}
+.select-dropdown option{background:var(--surface2)}
+.background-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.bg-option{padding:14px 10px;background:var(--surface);border:1px solid var(--border);border-radius:4px;cursor:pointer;transition:all .18s;text-align:center}
+.bg-option:hover{border-color:var(--orange)}
+.bg-option.selected{border-color:var(--orange);background:rgba(232,99,10,.1)}
+.bg-label{font-family:var(--fm);font-size:11px;color:var(--orange);letter-spacing:.1em;text-transform:uppercase;display:block}
+.bg-desc{font-size:12px;color:var(--text-muted);margin-top:4px;display:block}
+.create-actions{display:flex;gap:12px;margin-top:40px}
+
+/* MAIN GAME */
+#screen-game{flex-direction:column;overflow:hidden}
+.game-topbar{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:44px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
+.topbar-logo{font-family:var(--fd);font-size:18px;color:var(--orange);letter-spacing:.1em}
+.topbar-info{display:flex;gap:24px;align-items:center}
+.topbar-stat{font-family:var(--fm);font-size:11px;color:var(--text-muted);letter-spacing:.05em}
+.topbar-stat span{color:var(--text-dim);font-weight:500}
+.game-body{display:grid;grid-template-columns:280px 1fr 280px;flex:1;overflow:hidden}
+.panel-left{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+.panel-section{padding:20px;border-bottom:1px solid var(--border)}
+.panel-section:last-child{border-bottom:none}
+.panel-label{font-family:var(--fm);font-size:9px;letter-spacing:.3em;color:var(--text-muted);text-transform:uppercase;margin-bottom:16px}
+.char-name{font-family:var(--fd);font-size:26px;color:var(--text);letter-spacing:.05em;line-height:1}
+.char-age{font-family:var(--fm);font-size:13px;color:var(--orange);margin-top:4px}
+.char-details{margin-top:10px;display:flex;flex-direction:column;gap:3px}
+.char-detail{font-family:var(--fm);font-size:11px;color:var(--text-muted)}
+.char-detail span{color:var(--text-dim)}
+.stat-list{display:flex;flex-direction:column;gap:14px}
+.stat-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.stat-name{font-family:var(--fm);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--text-dim)}
+.stat-value{font-family:var(--fm);font-size:11px;font-weight:500}
+.stat-bar-bg{width:100%;height:4px;background:var(--surface3);border-radius:2px;overflow:hidden}
+.stat-bar-fill{height:100%;border-radius:2px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.stat-bar-fill.health{background:linear-gradient(90deg,var(--danger),#ff6b6b)}
+.stat-bar-fill.happiness{background:linear-gradient(90deg,var(--gold),#f0c060)}
+.stat-bar-fill.intelligence{background:linear-gradient(90deg,var(--cyan),#40e8d0)}
+.stat-bar-fill.looks{background:linear-gradient(90deg,var(--orange),#ff8c40)}
+.mini-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mini-stat{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px}
+.mini-stat-label{font-family:var(--fm);font-size:9px;letter-spacing:.2em;color:var(--text-muted);text-transform:uppercase}
+.mini-stat-value{font-family:var(--fm);font-size:13px;color:var(--text);margin-top:4px;font-weight:500}
+.mini-stat-value.positive{color:var(--success)}
+.mini-stat-value.negative{color:var(--danger)}
+.mini-stat-value.accent{color:var(--cyan)}
+.panel-center{display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
+.event-area{flex:1;overflow-y:auto;padding:32px 36px}
+.event-wrapper{animation:slideUp .35s ease}
+.event-age-badge{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:5px 12px;margin-bottom:20px}
+.age-num{font-family:var(--fd);font-size:20px;color:var(--orange);letter-spacing:.05em;line-height:1}
+.age-label{font-family:var(--fm);font-size:10px;color:var(--text-muted);letter-spacing:.2em;text-transform:uppercase}
+.event-category{font-family:var(--fm);font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:var(--cyan);margin-bottom:8px}
+.event-title{font-family:var(--fd);font-size:32px;color:var(--text);letter-spacing:.03em;line-height:1.1;margin-bottom:16px}
+.event-narrative{color:var(--text-dim);font-size:15px;line-height:1.75;margin-bottom:28px;font-style:italic}
+.event-choices{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+.outcome-box{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--orange);border-radius:4px;padding:20px;margin-bottom:24px;animation:slideUp .3s ease}
+.outcome-box.hidden{display:none}
+.outcome-label{font-family:var(--fm);font-size:9px;letter-spacing:.3em;color:var(--orange);text-transform:uppercase;margin-bottom:10px}
+.outcome-narrative{color:var(--text);font-size:15px;line-height:1.65;margin-bottom:14px}
+.stat-changes{display:flex;flex-wrap:wrap;gap:8px}
+.stat-change-pill{font-family:var(--fm);font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500}
+.stat-change-pill.positive{background:rgba(94,201,110,.15);color:var(--success);border:1px solid rgba(94,201,110,.3)}
+.stat-change-pill.negative{background:rgba(232,64,64,.15);color:var(--danger);border:1px solid rgba(232,64,64,.3)}
+.idle-state{text-align:center;padding:80px 40px}
+.idle-icon{font-size:48px;margin-bottom:20px;opacity:.3;display:block}
+.idle-state p{color:var(--text-muted);font-style:italic;font-size:16px}
+.game-bottom{background:var(--surface);border-top:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.bottom-tabs{display:flex;gap:4px}
+.bottom-tab{padding:7px 16px;background:transparent;border:1px solid transparent;border-radius:2px;color:var(--text-muted);font-family:var(--fm);font-size:10px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .18s}
+.bottom-tab:hover{color:var(--text);border-color:var(--border)}
+.bottom-tab.active{color:var(--cyan);border-color:var(--cyan);background:rgba(0,201,177,.06)}
+.panel-right{background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.log-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.log-title{font-family:var(--fm);font-size:9px;letter-spacing:.3em;color:var(--text-muted);text-transform:uppercase}
+.log-count{font-family:var(--fm);font-size:10px;color:var(--text-muted);background:var(--surface2);padding:2px 8px;border-radius:10px}
+.log-list{flex:1;overflow-y:auto;padding:8px 0}
+.log-entry{padding:12px 20px;border-bottom:1px solid rgba(58,58,58,.5);transition:background .15s;animation:slideUp .3s ease}
+.log-entry:hover{background:var(--surface2)}
+.log-entry:last-child{border-bottom:none}
+.log-entry-age{font-family:var(--fm);font-size:10px;color:var(--orange);font-weight:500;margin-bottom:3px}
+.log-entry-title{font-size:13px;color:var(--text-dim);line-height:1.4}
+.log-entry-title.cat-family{color:var(--gold)}
+.log-entry-title.cat-romance{color:#e880a0}
+.log-entry-title.cat-career{color:var(--cyan)}
+.log-entry-title.cat-crime{color:var(--danger)}
+.log-entry-title.cat-health{color:var(--success)}
+
+/* DEATH */
+#screen-death{flex-direction:column;align-items:center;justify-content:center;background:#0a0a0a;overflow-y:auto;padding:60px 20px}
+.death-container{max-width:600px;width:100%;text-align:center;animation:fadeIn 1.5s ease}
+.death-eyebrow{font-family:var(--fm);font-size:10px;letter-spacing:.4em;color:var(--text-muted);text-transform:uppercase;margin-bottom:20px}
+.death-name{font-family:var(--fd);font-size:56px;color:var(--text);letter-spacing:.05em;margin-bottom:8px}
+.death-years{font-family:var(--fm);font-size:14px;color:var(--text-muted);letter-spacing:.2em;margin-bottom:8px}
+.death-cause{font-family:var(--fb);font-style:italic;color:var(--danger);font-size:15px;margin-bottom:40px}
+.legacy-score-wrap{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:32px}
+.legacy-num{font-family:var(--fd);font-size:64px;color:var(--orange);letter-spacing:.05em;line-height:1}
+.legacy-info{text-align:left}
+.legacy-descriptor{font-family:var(--fd);font-size:22px;color:var(--text);letter-spacing:.05em}
+.legacy-sub{font-family:var(--fm);font-size:10px;color:var(--text-muted);letter-spacing:.2em;text-transform:uppercase;margin-top:4px}
+.plaque{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:32px 36px;margin:0 auto 40px;text-align:left;position:relative;overflow:hidden}
+.plaque::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--orange),var(--cyan))}
+.plaque-label{font-family:var(--fm);font-size:9px;letter-spacing:.3em;color:var(--orange);text-transform:uppercase;margin-bottom:16px}
+.plaque-text{font-size:16px;color:var(--text);line-height:1.75;font-style:italic}
+.death-highlights{text-align:left;margin-bottom:40px}
+.highlights-label{font-family:var(--fm);font-size:9px;letter-spacing:.3em;color:var(--text-muted);text-transform:uppercase;margin-bottom:14px}
+.highlight-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px;color:var(--text-dim)}
+.highlight-item:last-child{border-bottom:none}
+.highlight-age{font-family:var(--fm);font-size:11px;color:var(--orange);flex-shrink:0;min-width:40px}
+.death-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:100;display:none;align-items:center;justify-content:center}
+.modal-overlay.active{display:flex;animation:fadeIn .2s ease}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:4px;width:90%;max-width:500px;max-height:80vh;overflow-y:auto;animation:slideUp .3s ease}
+.modal-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-family:var(--fd);font-size:22px;color:var(--text);letter-spacing:.05em}
+.modal-close{background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer;padding:4px;transition:color .2s;line-height:1}
+.modal-close:hover{color:var(--text)}
+.modal-body{padding:24px}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface3);border:1px solid var(--border);border-radius:4px;padding:10px 20px;font-family:var(--fm);font-size:12px;color:var(--text);opacity:0;transition:all .3s ease;z-index:200;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.npc-row{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border)}
+.npc-row:last-child{border-bottom:none}
+.npc-avatar{width:36px;height:36px;border-radius:50%;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.npc-info{flex:1}
+.npc-name{font-size:14px;color:var(--text)}
+.npc-role{font-family:var(--fm);font-size:10px;color:var(--text-muted);margin-top:2px}
+.npc-dead{color:var(--text-muted);text-decoration:line-through}
+.npc-bars{display:flex;flex-direction:column;gap:4px;min-width:100px}
+.npc-bar-row{display:flex;align-items:center;gap:6px}
+.npc-bar-label{font-family:var(--fm);font-size:9px;color:var(--text-muted);width:20px}
+.npc-bar-bg{flex:1;height:3px;background:var(--surface3);border-radius:2px}
+.npc-bar-fill{height:100%;border-radius:2px;background:var(--cyan)}
+.npc-bar-fill.trust-bar{background:var(--orange)}
+</style>
+</head>
+<body>
+
+<div id="screen-title" class="screen active">
+  <div class="title-eyebrow">A life simulation</div>
+  <div class="title-logo">ORIGIN<span>ZERO</span></div>
+  <div class="title-tagline">Every life begins at zero.</div>
+  <div class="title-divider"></div>
+  <div class="title-buttons">
+    <button class="btn btn-primary" onclick="showScreen('create')">NEW LIFE</button>
+    <button class="btn btn-secondary" id="btn-continue" onclick="continueGame()" disabled>CONTINUE</button>
+  </div>
+  <div class="title-version">STAGE 1 BUILD &nbsp;·&nbsp; 2026</div>
+</div>
+
+<div id="screen-create" class="screen">
+  <div class="create-container">
+    <div class="create-header">
+      <h2>WHO ARE YOU?</h2>
+      <p>Every life is shaped by where it begins.</p>
+    </div>
+    <div class="create-section">
+      <label>Your Name</label>
+      <input class="input-text" id="input-name" type="text" placeholder="Enter your name..." maxlength="30">
+    </div>
+    <div class="create-section">
+      <label>Gender</label>
+      <div class="select-grid" id="gender-select">
+        <div class="select-option" data-value="male" onclick="selectOpt(this,'gender-select')">Male</div>
+        <div class="select-option" data-value="female" onclick="selectOpt(this,'gender-select')">Female</div>
+        <div class="select-option" data-value="nonbinary" onclick="selectOpt(this,'gender-select')">Non-binary</div>
+      </div>
+    </div>
+    <div class="create-section">
+      <label>Country of Birth</label>
+      <select class="select-dropdown" id="country-select">
+        <option value="">Select a country...</option>
+        <optgroup label="West Africa">
+          <option value="Nigeria">Nigeria</option>
+          <option value="Ghana">Ghana</option>
+          <option value="Senegal">Senegal</option>
+        </optgroup>
+        <optgroup label="Europe">
+          <option value="United Kingdom">United Kingdom</option>
+          <option value="France">France</option>
+          <option value="Germany">Germany</option>
+        </optgroup>
+        <optgroup label="Americas">
+          <option value="United States">United States</option>
+          <option value="Brazil">Brazil</option>
+          <option value="Canada">Canada</option>
+        </optgroup>
+        <optgroup label="Asia">
+          <option value="India">India</option>
+          <option value="Japan">Japan</option>
+          <option value="South Korea">South Korea</option>
+        </optgroup>
+      </select>
+    </div>
+    <div class="create-section">
+      <label>Family Background</label>
+      <div class="background-grid" id="bg-select">
+        <div class="bg-option" data-value="poor" onclick="selectOpt(this,'bg-select')"><span class="bg-label">Poor</span><span class="bg-desc">Survival from day one</span></div>
+        <div class="bg-option" data-value="working" onclick="selectOpt(this,'bg-select')"><span class="bg-label">Working</span><span class="bg-desc">Ends barely meet</span></div>
+        <div class="bg-option" data-value="middle" onclick="selectOpt(this,'bg-select')"><span class="bg-label">Middle</span><span class="bg-desc">Stable but not easy</span></div>
+        <div class="bg-option" data-value="wealthy" onclick="selectOpt(this,'bg-select')"><span class="bg-label">Wealthy</span><span class="bg-desc">Doors already open</span></div>
+        <div class="bg-option" data-value="elite" onclick="selectOpt(this,'bg-select')"><span class="bg-label">Elite</span><span class="bg-desc">Born into everything</span></div>
+      </div>
+    </div>
+    <div class="create-actions">
+      <button class="btn btn-secondary" onclick="showScreen('title')">BACK</button>
+      <button class="btn btn-primary" onclick="startGame()">BEGIN YOUR LIFE</button>
+    </div>
+  </div>
+</div>
+
+<div id="screen-game" class="screen">
+  <div class="game-topbar">
+    <div class="topbar-logo">ORIGIN: ZERO</div>
+    <div class="topbar-info">
+      <div class="topbar-stat">YEAR <span id="hud-year">—</span></div>
+      <div class="topbar-stat">NET WORTH <span id="hud-worth">—</span></div>
+      <div class="topbar-stat">STATUS <span id="hud-status">—</span></div>
+    </div>
+  </div>
+  <div class="game-body">
+    <div class="panel-left">
+      <div class="panel-section">
+        <div class="char-name" id="char-name">—</div>
+        <div class="char-age" id="char-age">—</div>
+        <div class="char-details">
+          <div class="char-detail" id="char-country">—</div>
+          <div class="char-detail" id="char-career">—</div>
+          <div class="char-detail" id="char-rel">—</div>
+        </div>
+      </div>
+      <div class="panel-section">
+        <div class="panel-label">Vitals</div>
+        <div class="stat-list">
+          <div class="stat-item">
+            <div class="stat-header"><span class="stat-name">Health</span><span class="stat-value" id="val-health" style="color:var(--danger)">—</span></div>
+            <div class="stat-bar-bg"><div class="stat-bar-fill health" id="bar-health" style="width:0%"></div></div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-header"><span class="stat-name">Happiness</span><span class="stat-value" id="val-happiness" style="color:var(--gold)">—</span></div>
+            <div class="stat-bar-bg"><div class="stat-bar-fill happiness" id="bar-happiness" style="width:0%"></div></div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-header"><span class="stat-name">Intelligence</span><span class="stat-value" id="val-intelligence" style="color:var(--cyan)">—</span></div>
+            <div class="stat-bar-bg"><div class="stat-bar-fill intelligence" id="bar-intelligence" style="width:0%"></div></div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-header"><span class="stat-name">Looks</span><span class="stat-value" id="val-looks" style="color:var(--orange)">—</span></div>
+            <div class="stat-bar-bg"><div class="stat-bar-fill looks" id="bar-looks" style="width:0%"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel-section">
+        <div class="panel-label">Overview</div>
+        <div class="mini-stats">
+          <div class="mini-stat"><div class="mini-stat-label">Cash</div><div class="mini-stat-value accent" id="mini-cash">$0</div></div>
+          <div class="mini-stat"><div class="mini-stat-label">Debt</div><div class="mini-stat-value" id="mini-debt">$0</div></div>
+          <div class="mini-stat"><div class="mini-stat-label">Fame</div><div class="mini-stat-value" id="mini-fame">None</div></div>
+          <div class="mini-stat"><div class="mini-stat-label">Karma</div><div class="mini-stat-value" id="mini-karma">Neutral</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="panel-center">
+      <div class="event-area" id="event-area">
+        <div class="idle-state" id="idle-state">
+          <span class="idle-icon">◎</span>
+          <p>Your life awaits.<br>Press Age Up to begin.</p>
+        </div>
+        <div id="event-display" style="display:none"></div>
+      </div>
+      <div class="game-bottom">
+        <div class="bottom-tabs">
+          <button class="bottom-tab active" onclick="openTab(this,'stats')">STATS</button>
+          <button class="bottom-tab" onclick="openTab(this,'people')">PEOPLE</button>
+          <button class="bottom-tab" onclick="openTab(this,'career')">CAREER</button>
+          <button class="bottom-tab" onclick="openTab(this,'assets')">ASSETS</button>
+        </div>
+        <button class="btn btn-age-up" id="btn-age-up" onclick="ageUp()">AGE UP</button>
+      </div>
+    </div>
+    <div class="panel-right">
+      <div class="log-header">
+        <div class="log-title">Life Log</div>
+        <div class="log-count" id="log-count">0 events</div>
+      </div>
+      <div class="log-list" id="log-list"></div>
+    </div>
+  </div>
+</div>
+
+<div id="screen-death" class="screen">
+  <div class="death-container" id="death-container"></div>
+</div>
+
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title"></div>
+      <button class="modal-close" onclick="closeModal()">&#10005;</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* === SECTION 1: CONSTANTS === */
+const COUNTRIES={Nigeria:{currency:'&#8358;',region:'West Africa',examSystem:'WAEC/JAMB'},Ghana:{currency:'GH&#8373;',region:'West Africa',examSystem:'WASSCE'},'United Kingdom':{currency:'&pound;',region:'Europe',examSystem:'GCSEs/A-Levels'},France:{currency:'&euro;',region:'Europe',examSystem:'Baccalaur&eacute;at'},'United States':{currency:'$',region:'Americas',examSystem:'SAT/ACT'},India:{currency:'&#8377;',region:'Asia',examSystem:'JEE/NEET'},Brazil:{currency:'R$',region:'Americas',examSystem:'ENEM'},Germany:{currency:'&euro;',region:'Europe',examSystem:'Abitur'},Canada:{currency:'CA$',region:'Americas',examSystem:'Provincial'},Japan:{currency:'&yen;',region:'Asia',examSystem:'University Entrance'},Senegal:{currency:'CFA',region:'West Africa',examSystem:'Bac'},'South Korea':{currency:'&#8361;',region:'Asia',examSystem:'CSAT'}};
+const FAMILY_BG={poor:{cash:0,statMod:{health:-10,happiness:-10,intelligence:0,looks:-5},label:'Poverty'},working:{cash:500,statMod:{health:-5,happiness:-5,intelligence:0,looks:0},label:'Working Class'},middle:{cash:5000,statMod:{health:0,happiness:5,intelligence:5,looks:0},label:'Middle Class'},wealthy:{cash:50000,statMod:{health:5,happiness:10,intelligence:10,looks:5},label:'Wealthy'},elite:{cash:500000,statMod:{health:10,happiness:15,intelligence:15,looks:10},label:'Elite'}};
+const FNAMES={male:['Emeka','Tunde','Chidi','Kwame','James','Oliver','Mohammed','Arjun','Carlos','Leon','Marcus','Tobias'],female:['Adaeze','Fatima','Zainab','Ama','Sophie','Amelia','Priya','Yuki','Isabella','Chioma','Layla','Nadia'],nonbinary:['Alex','Jordan','River','Sage','Quinn','Avery','Morgan','Rowan']};
+const LNAMES=['Okafor','Mensah','Diallo','Johnson','Williams','Smith','Patel','Tanaka','Silva','Kim','Osei','Ibrahim'];
+const PERSONALITIES=['supportive','strict','absent','loving','critical','nurturing','cold'];
+
+/* === SECTION 2: GAME STATE === */
+let G=null;
+function newState(name,gender,country,bg,birthYear){
+  const b=FAMILY_BG[bg];
+  const rs=(base,mod)=>clamp(base+mod+rnd(-10,10),1,100);
+  return{
+    name,gender,country,birthYear,age:0,background:bg,
+    stats:{health:rs(70,b.statMod.health),happiness:rs(65,b.statMod.happiness),intelligence:rs(50,b.statMod.intelligence),looks:rs(55,b.statMod.looks)},
+    hidden:{karma:50,reputation:40,stress:20,luck:rnd(30,70)},
+    finances:{cash:b.cash,debt:0,annualIncome:0,annualExpenses:0,netWorth:b.cash,investments:[]},
+    career:{path:null,title:'Unemployed',level:0,salary:0,yearsInRole:0,employer:null,industry:null,history:[]},
+    education:{stage:'none',institution:null,gpa:null,examScores:{},degree:null,graduated:false,droppedOut:false,currentYear:null},
+    npcs:{mother:makeParent('mother'),father:makeParent('father'),siblings:[],friends:[],enemies:[],partner:null,exes:[],children:[],rivals:[],mentor:null},
+    fame:{level:0,popularity:rnd(35,55),fanCount:0,publicImage:50,scandals:[],awards:[],pressRel:50},
+    assets:{phone:null,car:null,properties:[],wardrobe:{tier:'basic',brands:[]},jewelry:[],watches:[],gadgets:[],vehicles:[]},
+    world:{year:birthYear,economy:'stable',politicalClimate:'normal',activeTrends:[],events:[]},
+    flags:{started_school:false,finished_primary:false,started_secondary:false,passed_major_exam:false,failed_major_exam:false,started_university:false,dropped_out_uni:false,graduated_university:false,had_first_friend:false,had_first_crush:false,first_heartbreak_age:null,been_bullied:false,was_bully:false,first_job:false,ever_fired:false,ever_arrested:false,has_addiction:false,married:false,divorced:false,has_children:false,parent_died:false,immigrated:false,became_famous:false,diagnosed_depression:false},
+    lifeLog:[],achievements:{unlocked:[]},generation:{number:1,parentLegacy:null},
+    _fired:[],_currentEvent:null,_awaiting:false,_deathYear:null,_causeOfDeath:null
+  };
+}
+
+/* === SECTION 3: NPC SYSTEM === */
+function makeParent(role){
+  const isMale=role==='father';
+  const names=isMale?FNAMES.male:FNAMES.female;
+  return{id:role,name:pick(names)+' '+pick(LNAMES),gender:isMale?'male':'female',age:rnd(22,40),alive:true,causeOfDeath:null,deathAge:null,relationship:role,personality:pick(PERSONALITIES),trust:rnd(60,80),closeness:rnd(60,80),history:[],stats:{health:75,happiness:60},occupation:null,wealthLevel:2,isRealPerson:false};
+}
+function makeFriend(age){
+  const g=Math.random()>.5?'male':'female';
+  return{id:'fr_'+Date.now()+rnd(0,999),name:pick(FNAMES[g]),gender:g,age:age+rnd(-2,2),alive:true,causeOfDeath:null,deathAge:null,relationship:'friend',personality:pick(['loyal','fun','ambitious','quiet','troublemaker']),trust:rnd(50,80),closeness:rnd(50,80),history:[],stats:{health:80,happiness:65},occupation:null,wealthLevel:1,isRealPerson:false};
+}
+function ageNPCs(){
+  ['mother','father'].forEach(r=>{
+    const p=G.npcs[r];
+    if(!p||!p.alive)return;
+    p.age++;p.stats.health-=.5;
+    if(p.age>75&&p.stats.health<20&&Math.random()<.15){
+      p.alive=false;p.causeOfDeath=p.age>80?'old age':'illness';p.deathAge=p.age;
+      G.flags.parent_died=true;
+      addLog(G.age,p.name+' passed away at age '+p.age+'.','family');
+      toast(p.name+' has passed away.');
+    }
+  });
+  G.npcs.friends.forEach(f=>{if(f.alive){f.age++;f.closeness=Math.max(0,f.closeness-1);}});
+}
+
+/* === SECTION 4: EVENT LIBRARY === */
+const EVENTS=[
+  {id:'birth',title:'You Are Born',narrative:'You arrive into the world with no memory, no knowledge of what awaits. Only the sound of voices and the warmth of hands that will shape everything.',category:'family',lifeStage:'childhood',conditions:{ageMin:0,ageMax:0,gender:'any',countries:'any',statsMin:{},statsMax:{},flagsRequired:[],flagsExcluded:['__born'],isMilestone:true,repeatable:false,probability:1},choices:[{text:'Begin.',condition:null,outcome:{narrative:'Your story starts now.',stats:{},hidden:{},flags:{__born:true},finances:{},npcEffects:[],triggerEvent:null,achievement:null}}]},
+
+  {id:'first_day_school',title:'First Day of School',narrative:'Your mother holds your hand a little too tight as you approach the school gates. Everything is loud and unfamiliar. A kid waves at you from across the yard.',category:'school',lifeStage:'childhood',conditions:{ageMin:5,ageMax:5,gender:'any',countries:'any',statsMin:{},statsMax:{},flagsRequired:[],flagsExcluded:['started_school'],isMilestone:true,repeatable:false,probability:1},choices:[{text:'Wave back and introduce yourself',condition:null,outcome:{narrative:'His name is Chidi. He shares his lunch. You have made your first friend.',stats:{happiness:8,intelligence:2},hidden:{karma:5},flags:{started_school:true,had_first_friend:true},finances:{},npcEffects:[],triggerEvent:null,achievement:null}},{text:'Stay close to your mother, say nothing',condition:null,outcome:{narrative:'You spend the first week alone at the edge of the playground. Lonely, but you learn how everything works by watching.',stats:{happiness:-5,intelligence:5},hidden:{stress:10},flags:{started_school:true},finances:{},npcEffects:[],triggerEvent:null,achievement:null}}]},
+
+  {id:'childhood_bully',title:'The Bully',narrative:'An older kid has been making your life difficult. He takes your food, calls you names, makes sure everyone sees it. Today he pushes you in front of the whole class.',category:'school',lifeStage:'childhood',conditions:{ageMin:7,ageMax:11,gender:'any',countries:'any',statsMin:{},statsMax:{},flagsRequired:['started_school'],flagsExcluded:['been_bullied'],isMilestone:false,repeatable:false,probability:.35},choices:[{text:'Push him back hard',condition:null,outcome:{narrative:'You surprise everyone — including yourself. He stumbles. You get sent to the headmaster but the bullying stops.',stats:{happiness:10,health:-5},hidden:{reputation:15,stress:-10},flags:{been_bullied:true},finances:{},npcEffects:[],triggerEvent:null,achievement:null}},{text:'Walk away without saying anything',condition:null,outcome:{narrative:'You swallow it. It eats at you for months. Some nights you cry quietly so no one hears.',stats:{happiness:-12,intelligence:3},hidden:{stress:20,karma:5},flags:{been_bullied:true},finances:{},npcEffects:[],triggerEvent:null,achievement:null}},{text:'Tell your parents',condition:null,outcome:{narrative:"They speak to the school. The bully is suspended. He comes back angrier but more careful around you.",stats:{happiness:-3},hidden:{stress:-5,reputation:-5},flags:{been_bullied:true},finances:{},npcEffects:[{npcId:'mother',trust:10},{npcId:'father',trust:10}],triggerEvent:null,achievement:null}}]},
+
+  {id:'childhood_talent',title:'Something You Are Good At',narrative:'You notice you have a gift. Something that comes easier to you than to others. A teacher points it out. Your classmates notice too.',category:'school',lifeStage:'childhood',conditions:{ageMin:8,ageMax:12,gender:'any',countries:'any',statsMin:{},statsMax:{},flagsRequired:[],flagsExcluded:[],isMilestone:false,repeatable:false,probability:.5},choices:[{text:'Pursue it seriously — practice every day',condition:null,outcome:{narrative:'You spend hours on it. You get better and better. It becomes part of who you are.',stats:{intelligence:10,happiness:8},hidden:{stress:5},flags:{},finances:{},npcEffects:[],triggerEvent:null,achievement:null}},{text:'Enjoy it casually without pressure',condition:null,outcome:{narrative:'You keep it as something yours — not a performance for others. It makes you happy without becoming a burden.',stats:{happiness:12},hidden:{karma:3},flags:{},finances:{},npcEffects:[],triggerEvent:null,achievement:null}},{text:"Ignore it — you'd rather fit in",condition:null,outcome:{narrative:"You hide it. You want to be normal. Years later you'll wonder what might have been.",stats:{happiness:-5,intelligence:-5},hidden:{stress:8},flags:{},finances:{},npcEffects:[],triggerEvent:null,achievement:null}}]},
+
+  {id:'family_money_crisis',title:'The Money Problems',narrative:"You're old enough now to understand the hushed conversations through the walls at night. Your parents are struggling. Bills pile up. The pressure in the house is suffocating.",category:'family',lifeStage:'childhood',conditions:{ageMin:8,ageMax:12,gender:'any',countries:'any',statsMin:{},statsMax:{},flagsRequired:[],flagsExcluded:[],isMilestone:false,repeatable:false,probability:.3},choices:[{text:'Find small ways to help — sell things, do errands',condition:null,outcome:{narrative:'You start earning tiny amounts on your own. It barely matters financially but your father looks at you differently now.',stats:{intelligence:5,happiness:5},hidden:{karma:10,reputation:5},flags:{},finances:{cash:50},npcEffects:[{npcId:'father',trust:15},{npcId:'mother',trust:10}],triggerEvent:null,achievement:null}},{text:'Pretend everything is fine and focus on school',condition:null,outcome:{narrative:'You bury yourself in school. Your grades are the one thing you can control.',stats:{intelligence:10,happiness:-8},hidden:{stress:15},flags:{},finances:{},npcEffects:[],triggerEvent:null,achievement:null}},{text:'Withdraw into yourself',condition:null,outcome:{narrative:'The weight of it sits on you quietly. You become a little harder, a little more closed.',stats:{happiness:-15,intelligence:2},hidden:{stress:20,karma:-2},flags:{},finances:{},npcEffects:[],triggerEvent:null,achievement:null}}]},
+
+  {id:'secondary_start',title:'Secondary School',narrative:"New school. New people. Everyone from primary is scattered. The social ladder here is completely different and you're starting from the bottom.",category:'school',lifeStage:'teen',conditions:{ageMin:11,ageMax:12,gender:'any',countries:'any',statsMin:{},statsMax:{},flagsRequired:['started_school'],flagsExcluded:['started_secondary'],isMilestone:true,repeatable:false,probability:1},choices:[{text:'Find your people — look for your group',condition:null,outcome:{narrative:'It takes a few weeks but you find them. A small tight group that gets you. These will matter.',stats:{happiness:10},hidden:{reputation:10},flags:{started_secondary:true},finances:{},npcEffects:[],triggerEvent:null,achievement:null}},{text:'Focus entirely on academics from day one',condition:null,outcome:{narrative:'You earn a reputation as the serious one. Teachers respect you. Most students leave you alone.',stats:{intelligence:12,happiness:-3},hidden:{reputation:5},flags:{started_secondary:true},finances:{},npcEffects:[],triggerEvent:null,achievement:null}},{text:'Try to be popular — play the social game',condition:null,outcome:{narrative:"You say the right things to the right people. You're not exactly popular but you're not invisible. It costs something you can't quite name.",stats:{happiness:5,looks:3},hidden:{reputation:15,stress:10},flags:{started_secondary:true},finances:{},npcEffects:[],triggerEvent:null,achievement:null}}]},
+
+  {id:'first_crush',title:'The First One',narrative:"There is someone. You don't know when it started exactly. But you find yourself looking for them in every room you enter.",category:'romance',lifeStage:'teen',conditions:{ageMin:13,ageMax:16,gender:'any',countries:'any',statsMin:{},statsMax:{},flagsRequired:['started_secondary'],flagsExcluded:['had_first_crush'],isMilestone:false,repeatable:false,probability:.6},choices:[{text:'Tell them how you feel',condition:null,outcome:{narrative:"You tell them. Your heart is doing something you've never felt before. They smile — but it's the smile that lets you down gently. You handle it. Barely.",stats:{happiness:-8,intelligence:5},hidden:{karma:8,stress:15},flags:{had_first_crush:true},finances:{},npcEffects:[],triggerEvent:null,achievement:null,_setFlag:(s)=>{s.flags.first_heartbreak_age=s.age;}}},{text:'Admire from a distance — say nothing',condition:null,outcome:{narrative:"You never say a word. They never know. For years you'll wonder what would have happened if you had.",stats:{happiness:-4},hidden:{stress:5},flags:{had_first_crush:true},finances:{},npcEffects:[],triggerEvent:null,achievement:null}}]},
+
+  {id:'peer_pressure',title:'The Circle',narrative:"Behind the school block, older students are smoking. One offers you one. Everyone is watching to see what you do.",category:'school',lifeStage:'teen',conditions:{ageMin:13,ageMax:17,gender:'any',countries:'any',statsMin:{},statsMax:{},flagsRequired:['started_secondary'],flagsExcluded:[],isMilestone:false,repeatable:false,probability:.4},choices:[{text:"Take it — you don't want to look afraid",condition:null,outcome:{narrative:"You cough. They laugh — not meanly. You're in the circle now. You tell yourself it's just once.",stats:{health:-5,happiness:5},hidden:{reputation:10,stress:-5,karma:-3},flags:{},finances:{},npcEffects:[],triggerEvent:null,achievement:null}},{text:'Decline and walk away',condition:null,outcome:{narrative:"Some of them sneer. You don't look back. You feel both proud and isolated.",stats:{health:3,happiness:-5},hidden:{karma:8,reputation:-5},flags:{},finances:{},npcEffects:[],triggerEvent:null,achievement:null}},{text:'Take it but fake it — play the game without the cost',condition:null,outcome:{narrative:"Nobody notices. You're accepted without the damage. Knowing how to read a room is its own kind of intelligence.",stats:{intelligence:5},hidden:{reputation:8},flags:{},finances:{},npcEffects:[],triggerEvent:null,achievement:null}}]},
+
+  {id:'first_job',title:'First Job',narrative:"You need money. Not someday — now. A local business is hiring and the pay is not much but it's yours. The idea of your own money, earned by your own hands, is something new.",category:'career',lifeStage:'youngadult',conditions:{ageMin:16,ageMax:22,gender:'any',countries:'any',statsMin:{},statsMax:{},flagsRequired:[],flagsExcluded:['first_job'],isMilestone:false,repeatable:false,probability:.5},choices:[{text:'Take the job immediately',condition:null,outcome:{narrative:"The first paycheck hits different. It's not much but it changes how you see yourself.",stats:{happiness:10,intelligence:5},hidden:{reputation:5},flags:{first_job:true},finances:{cash:300,annualIncome:3600},npcEffects:[],triggerEvent:null,achievement:null}},{text:'Hold out for something better',condition:null,outcome:{narrative:"You wait. Three months later nothing better materializes. You take a lesser job for less pay.",stats:{happiness:-5},hidden:{stress:10},flags:{first_job:true},finances:{cash:150,annualIncome:2000},npcEffects:[],triggerEvent:null,achievement:null}}]},
+
+  {id:'independence',title:'Out On Your Own',narrative:'The moment arrives. Moving out. Living on your own terms. It is equal parts terrifying and electric.',category:'family',lifeStage:'youngadult',conditions:{ageMin:18,ageMax:24,gender:'any',countries:'any',statsMin:{},statsMax:{},flagsRequired:[],flagsExcluded:[],isMilestone:false,repeatable:false,probability:.45},choices:[{text:'Move out and figure it out as you go',condition:null,outcome:{narrative:'The first month is chaos. Ramen and regret. But by month three something shifts. You become someone who handles things.',stats:{happiness:12,intelligence:8,health:-5},hidden:{stress:20,reputation:10},flags:{},finances:{cash:-500,annualExpenses:6000},npcEffects:[],triggerEvent:null,achievement:null}},{text:'Stay home a little longer — save money first',condition:null,outcome:{narrative:'Smart. You save for another year. When you go, you go properly.',stats:{intelligence:5,happiness:-5},hidden:{stress:-5},flags:{},finances:{cash:2000},npcEffects:[{npcId:'mother',closeness:5},{npcId:'father',closeness:5}],triggerEvent:null,achievement:null}}]},
+
+  {id:'health_scare',title:"Something's Not Right",narrative:"You've been ignoring it for weeks. The symptoms keep coming back. Today it's bad enough that you can't pretend anymore.",category:'health',lifeStage:'adult',conditions:{ageMin:25,ageMax:65,gender:'any',countries:'any',statsMin:{},statsMax:{health:50},flagsRequired:[],flagsExcluded:[],isMilestone:false,repeatable:false,probability:.3},choices:[{text:'See a doctor immediately',condition:null,outcome:{narrative:'Serious but caught in time. The treatment is expensive and exhausting. But you handle it.',stats:{health:20,happiness:-10},hidden:{stress:-15},flags:{},finances:{cash:-2000},npcEffects:[],triggerEvent:null,achievement:null}},{text:"Keep ignoring it — you're fine",condition:null,outcome:{narrative:'Six months later it is worse. The bill is higher. So is the fear.',stats:{health:-15,happiness:-10},hidden:{stress:25},flags:{},finances:{cash:-5000},npcEffects:[],triggerEvent:null,achievement:null}}]},
+];
+
+/* === SECTION 5: EVENT ENGINE === */
+function getEligible(){
+  return EVENTS.filter(ev=>{
+    const c=ev.conditions;
+    if(G.age<c.ageMin||G.age>c.ageMax)return false;
+    if(c.gender!=='any'&&c.gender!==G.gender)return false;
+    if(c.countries!=='any'&&!c.countries.includes(G.country))return false;
+    if(!c.repeatable&&G._fired.includes(ev.id))return false;
+    for(const f of c.flagsRequired)if(!G.flags[f])return false;
+    for(const f of c.flagsExcluded)if(G.flags[f])return false;
+    for(const[s,min]of Object.entries(c.statsMin||{}))if((G.stats[s]||0)<min)return false;
+    for(const[s,max]of Object.entries(c.statsMax||{}))if((G.stats[s]||0)>max)return false;
+    return true;
+  });
+}
+function pickEvent(){
+  const eligible=getEligible();
+  const milestones=eligible.filter(e=>e.conditions.isMilestone);
+  if(milestones.length>0)return milestones[0];
+  const pool=eligible.filter(e=>!e.conditions.isMilestone);
+  if(!pool.length)return null;
+  const weights=pool.map(e=>getWeight(e));
+  const total=weights.reduce((a,b)=>a+b,0);
+  let r=Math.random()*total,cum=0;
+  for(let i=0;i<pool.length;i++){cum+=weights[i];if(r<=cum)return pool[i];}
+  return pool[pool.length-1];
+}
+function getWeight(ev){
+  let w=ev.conditions.probability||.3;
+  if(G.stats.happiness<30&&(ev.category==='health'||ev.category==='family'))w*=1.4;
+  if(G.stats.health<30&&ev.category==='health')w*=1.6;
+  const lm=(G.hidden.luck-50)/200;
+  return Math.max(.01,w+w*lm);
+}
+
+/* === SECTION 6: STAT ENGINE === */
+function applyStats(changes){for(const[s,d]of Object.entries(changes))G.stats[s]=clamp((G.stats[s]||0)+d,0,100);}
+function applyHidden(changes){for(const[s,d]of Object.entries(changes))G.hidden[s]=clamp((G.hidden[s]||0)+d,0,100);}
+function naturalDecay(){
+  const a=G.age;
+  if(a>60)G.stats.health=Math.max(0,G.stats.health-2);
+  else if(a>45)G.stats.health=Math.max(0,G.stats.health-1);
+  if(a>50)G.stats.looks=Math.max(0,G.stats.looks-2);
+  else if(a>35)G.stats.looks=Math.max(0,G.stats.looks-1);
+  else if(a>5&&a<25)G.stats.looks=Math.min(100,G.stats.looks+.3);
+  if(G.education.stage==='primary'||G.education.stage==='secondary')
+    G.stats.intelligence=Math.min(100,G.stats.intelligence+1);
+}
+function crossStats(){
+  if(G.stats.happiness<20)G.stats.health=Math.max(0,G.stats.health-1);
+  if(G.hidden.stress>75)G.stats.happiness=Math.max(0,G.stats.happiness-2);
+  if(G.stats.looks>75&&G.age>=16&&G.age<=35)G.fame.popularity=Math.min(100,G.fame.popularity+1);
+}
+function checkThresholds(){
+  if(G.stats.health<=0){triggerDeath('natural causes');return false;}
+  if(G.stats.happiness<=5&&!G.flags.diagnosed_depression){
+    G.flags.diagnosed_depression=true;
+    addLog(G.age,'You reach a very low point.','health');
+    toast('Happiness critical.');
+  }
+  return true;
+}
+function applyOutcome(outcome){
+  if(outcome.stats)applyStats(outcome.stats);
+  if(outcome.hidden)applyHidden(outcome.hidden);
+  if(outcome.flags)Object.assign(G.flags,outcome.flags);
+  if(outcome._setFlag)outcome._setFlag(G);
+  if(outcome.finances)applyFinances(outcome.finances);
+  if(outcome.npcEffects)outcome.npcEffects.forEach(e=>{
+    const n=getNPC(e.npcId);
+    if(n){if(e.trust!==undefined)n.trust=clamp(n.trust+e.trust,0,100);if(e.closeness!==undefined)n.closeness=clamp(n.closeness+e.closeness,0,100);}
+  });
+  if(outcome.achievement)unlockAchievement(outcome.achievement);
+}
+
+/* === SECTION 7: MEMORY SYSTEM === */
+function injectMemory(txt){
+  let t=txt;
+  if(G.flags.been_bullied&&t.toLowerCase().includes('confront'))t+=' Something about this reminded you of those years you spent being made small.';
+  if(G.flags.first_heartbreak_age&&t.toLowerCase().includes('love'))t+=` You had learned what loss felt like at ${G.flags.first_heartbreak_age}.`;
+  return t;
+}
+
+/* === SECTION 8: RELATIONSHIP ENGINE === */
+function decayRel(){
+  G.npcs.friends.forEach(f=>{if(f.alive)f.closeness=Math.max(0,f.closeness-1);});
+  if(G.npcs.partner&&G.npcs.partner.alive)G.npcs.partner.trust=Math.max(0,G.npcs.partner.trust-.5);
+}
+function getNPC(id){
+  if(id==='mother')return G.npcs.mother;
+  if(id==='father')return G.npcs.father;
+  return G.npcs.friends.find(f=>f.id===id)||null;
+}
+
+/* === SECTION 9: CAREER ENGINE === */
+function updateEducation(){
+  const a=G.age;
+  if(a>=5&&a<=10&&G.education.stage==='none')G.education.stage='primary';
+  if(a>=11&&a<=17&&G.education.stage==='primary')G.education.stage='secondary';
+}
+
+/* === SECTION 10: ECONOMY ENGINE === */
+function applyFinances(ch){
+  if(ch.cash!==undefined)G.finances.cash+=ch.cash;
+  if(ch.debt!==undefined)G.finances.debt+=ch.debt;
+  if(ch.annualIncome!==undefined)G.finances.annualIncome+=ch.annualIncome;
+  if(ch.annualExpenses!==undefined)G.finances.annualExpenses+=ch.annualExpenses;
+  G.finances.netWorth=G.finances.cash-G.finances.debt;
+}
+function annualFinance(){
+  G.finances.cash+=G.finances.annualIncome-G.finances.annualExpenses;
+  if(G.finances.debt>0)G.finances.debt=Math.round(G.finances.debt*1.05);
+  G.finances.netWorth=G.finances.cash-G.finances.debt;
+  if(G.finances.cash<0){G.hidden.stress=Math.min(100,G.hidden.stress+10);G.stats.happiness=Math.max(0,G.stats.happiness-5);}
+}
+
+/* === SECTION 11: FAME ENGINE === */
+function fameLabel(l){return['Unknown','Local','National','Global'][l]||'Unknown';}
+function karmaLabel(k){if(k>=80)return'Saintly';if(k>=60)return'Good';if(k>=40)return'Neutral';if(k>=20)return'Questionable';return'Dark';}
+
+/* === SECTION 12: ACHIEVEMENT ENGINE === */
+function unlockAchievement(id){if(!G.achievements.unlocked.includes(id)){G.achievements.unlocked.push(id);toast('Achievement: '+id.replace(/_/g,' ').toUpperCase());}}
+function legacyScore(){
+  let s=0;
+  s+=Math.min(25,G.career.level*3);
+  s+=Math.min(20,((G.npcs.mother?.closeness||0)+(G.npcs.father?.closeness||0))/10);
+  s+=Math.min(20,G.hidden.karma/5);
+  if(G.finances.netWorth>1000000)s+=15;else if(G.finances.netWorth>100000)s+=10;else if(G.finances.netWorth>0)s+=5;
+  if(G.npcs.children.length>0)s+=10;
+  s+=Math.min(10,G.fame.level*3);
+  return Math.round(Math.min(100,s));
+}
+function legacyDescriptor(s){if(s>=85)return'Legendary';if(s>=70)return'Remarkable';if(s>=55)return'Memorable';if(s>=40)return'Ordinary';if(s>=25)return'Troubled';return'Forgotten';}
+function buildPlaque(){
+  const score=legacyScore();const descriptor=legacyDescriptor(score);
+  const born=G.birthYear;const died=G.birthYear+G.age;
+  const lines=[];
+  if(G.career.path&&G.career.level>=3)lines.push(G.career.title+' of some renown.');
+  if(G.npcs.children.length>0)lines.push('Parent to '+G.npcs.children.length+' '+(G.npcs.children.length===1?'child':'children')+'.');
+  if(G.fame.level===3)lines.push('Known across the world.');
+  else if(G.fame.level===2)lines.push('Known across the nation.');
+  else if(G.fame.level===1)lines.push('Known in their community.');
+  const closings={Saintly:'The world was kinder for having them in it.',Good:'They left things better than they found them.',Neutral:'They lived. They tried. That is enough.',Questionable:'It was complicated. Life usually is.',Dark:'They made their choices. The choices made them.'};
+  lines.push(closings[karmaLabel(G.hidden.karma)]||'They were here.');
+  return{plaqueText:'Here lies '+G.name+'.\n'+lines.join(' '),score,descriptor,born,died};
+}
+
+/* === SECTION 13: SAVE SYSTEM === */
+const SKEY='originzero_save';
+function save(){try{localStorage.setItem(SKEY,JSON.stringify(G));}catch(e){}}
+function loadSave(){try{const r=localStorage.getItem(SKEY);return r?JSON.parse(r):null;}catch(e){return null;}}
+function deleteSave(){localStorage.removeItem(SKEY);}
+function hasSave(){return!!localStorage.getItem(SKEY);}
+
+/* === SECTION 14: RENDER ENGINE === */
+function renderStats(){
+  ['health','happiness','intelligence','looks'].forEach(s=>{
+    const v=Math.round(G.stats[s]);
+    document.getElementById('val-'+s).textContent=v;
+    document.getElementById('bar-'+s).style.width=v+'%';
+  });
+  document.getElementById('hud-year').textContent=G.world.year;
+  document.getElementById('hud-worth').textContent=money(G.finances.netWorth);
+  document.getElementById('hud-status').textContent=G.career.title||'Unemployed';
+  document.getElementById('char-name').textContent=G.name;
+  document.getElementById('char-age').textContent='Age '+G.age+' \u00b7 '+G.world.year;
+  document.getElementById('char-country').innerHTML='<span>'+G.country+'</span>';
+  document.getElementById('char-career').innerHTML='<span>'+(G.career.title||'Unemployed')+'</span>';
+  document.getElementById('char-rel').innerHTML='<span>'+(G.npcs.partner?'In a relationship':'Single')+'</span>';
+  const mc=document.getElementById('mini-cash');
+  mc.textContent=money(G.finances.cash);mc.className='mini-stat-value '+(G.finances.cash>=0?'accent':'negative');
+  const md=document.getElementById('mini-debt');
+  md.textContent=money(G.finances.debt);md.className='mini-stat-value '+(G.finances.debt>0?'negative':'');
+  document.getElementById('mini-fame').textContent=fameLabel(G.fame.level);
+  document.getElementById('mini-karma').textContent=karmaLabel(G.hidden.karma);
+}
+function renderEvent(ev){
+  document.getElementById('idle-state').style.display='none';
+  const d=document.getElementById('event-display');d.style.display='block';
+  const letters=['A','B','C','D'];
+  const choices=ev.choices.map((c,i)=>`<button class="btn btn-choice" onclick="makeChoice(${i})"><span class="choice-letter">${letters[i]}</span>${c.text}</button>`).join('');
+  d.innerHTML=`<div class="event-wrapper">
+    <div class="event-age-badge"><span class="age-num">${G.age}</span><span class="age-label">years old</span></div>
+    <div class="event-category">${ev.category.toUpperCase()}</div>
+    <div class="event-title">${ev.title}</div>
+    <div class="event-narrative">${injectMemory(ev.narrative)}</div>
+    <div class="event-choices" id="choice-btns">${choices}</div>
+    <div class="outcome-box hidden" id="outcome-box">
+      <div class="outcome-label">What Happened</div>
+      <div class="outcome-narrative" id="outcome-text"></div>
+      <div class="stat-changes" id="outcome-pills"></div>
+    </div>
+  </div>`;
+  document.getElementById('event-area').scrollTop=0;
+}
+function renderOutcome(outcome){
+  const box=document.getElementById('outcome-box');box.classList.remove('hidden');
+  document.getElementById('outcome-text').textContent=outcome.narrative;
+  const pills=[];
+  if(outcome.stats)for(const[s,d]of Object.entries(outcome.stats)){const sign=d>0?'+':'';pills.push(`<span class="stat-change-pill ${d>0?'positive':'negative'}">${sign}${d} ${s}</span>`);}
+  document.getElementById('outcome-pills').innerHTML=pills.join('');
+  document.getElementById('choice-btns').style.display='none';
+  document.getElementById('btn-age-up').disabled=false;
+}
+function addLog(age,title,cat){
+  G.lifeLog.push({age,title,category:cat||'general'});
+  const list=document.getElementById('log-list');
+  const div=document.createElement('div');div.className='log-entry';
+  div.innerHTML=`<div class="log-entry-age">Age ${age}</div><div class="log-entry-title cat-${cat||'general'}">${title}</div>`;
+  list.insertBefore(div,list.firstChild);
+  document.getElementById('log-count').textContent=G.lifeLog.length+' event'+(G.lifeLog.length!==1?'s':'');
+}
+function renderDeath(){
+  showScreen('death');
+  const {plaqueText,score,descriptor,born,died}=buildPlaque();
+  const lifespan=died-born;
+  const highlights=G.lifeLog.slice(-5).reverse().map(e=>`<div class="highlight-item"><span class="highlight-age">Age ${e.age}</span><span>${e.title}</span></div>`).join('');
+  document.getElementById('death-container').innerHTML=`
+    <div class="death-eyebrow">IN MEMORIAM</div>
+    <div class="death-name">${G.name}</div>
+    <div class="death-years">${born} \u2014 ${died} &nbsp;\u00b7&nbsp; ${lifespan} years</div>
+    <div class="death-cause">Cause of death: ${G._causeOfDeath||'natural causes'}</div>
+    <div class="legacy-score-wrap">
+      <div class="legacy-num">${score}</div>
+      <div class="legacy-info"><div class="legacy-descriptor">${descriptor}</div><div class="legacy-sub">Legacy Score</div></div>
+    </div>
+    <div class="plaque">
+      <div class="plaque-label">Life Plaque</div>
+      <div class="plaque-text">${plaqueText.replace(/\n/g,'<br>')}</div>
+    </div>
+    ${G.lifeLog.length>0?`<div class="death-highlights"><div class="highlights-label">Life Highlights</div>${highlights}</div>`:''}
+    <div class="death-actions">
+      <button class="btn btn-primary" onclick="newGame()">NEW LIFE</button>
+      <button class="btn btn-secondary" onclick="showScreen('title')">MAIN MENU</button>
+    </div>`;
+}
+function showModal(title,html){
+  document.getElementById('modal-title').textContent=title;
+  document.getElementById('modal-body').innerHTML=html;
+  document.getElementById('modal-overlay').classList.add('active');
+}
+function closeModal(e){if(!e||e.target===document.getElementById('modal-overlay'))document.getElementById('modal-overlay').classList.remove('active');}
+function statRow(name,val,color){return`<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-family:var(--fm);font-size:11px;color:var(--text-dim)">${name.toUpperCase()}</span><span style="font-family:var(--fm);font-size:12px;color:${color};font-weight:500">${Math.round(val)}</span></div><div style="width:100%;height:6px;background:var(--surface3);border-radius:3px;overflow:hidden"><div style="width:${val}%;height:100%;background:${color};border-radius:3px;transition:width .4s"></div></div></div>`;}
+function openTab(el,tab){
+  document.querySelectorAll('.bottom-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');
+  if(tab==='stats')showModal('Vitals',statRow('Health',G.stats.health,'var(--danger)')+statRow('Happiness',G.stats.happiness,'var(--gold)')+statRow('Intelligence',G.stats.intelligence,'var(--cyan)')+statRow('Looks',G.stats.looks,'var(--orange)')+`<div style="border-top:1px solid var(--border);padding-top:16px;margin-top:8px"><div class="panel-label" style="margin-bottom:12px">Hidden Attributes</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div><div style="font-family:var(--fm);font-size:10px;color:var(--text-muted)">KARMA</div><div style="color:var(--text);margin-top:4px">${karmaLabel(G.hidden.karma)} (${G.hidden.karma})</div></div><div><div style="font-family:var(--fm);font-size:10px;color:var(--text-muted)">STRESS</div><div style="color:var(--text);margin-top:4px">${G.hidden.stress}/100</div></div><div><div style="font-family:var(--fm);font-size:10px;color:var(--text-muted)">REPUTATION</div><div style="color:var(--text);margin-top:4px">${G.hidden.reputation}/100</div></div><div><div style="font-family:var(--fm);font-size:10px;color:var(--text-muted)">LUCK</div><div style="color:var(--text);margin-top:4px">${G.hidden.luck}/100</div></div></div></div>`);
+  else if(tab==='people'){
+    const npcs=[G.npcs.mother,G.npcs.father,...G.npcs.friends];
+    if(G.npcs.partner)npcs.push(G.npcs.partner);
+    const emo={mother:'👩',father:'👨',friend:'🧑',partner:'❤️'};
+    const rows=npcs.filter(Boolean).map(n=>`<div class="npc-row"><div class="npc-avatar">${emo[n.relationship]||'🧑'}</div><div class="npc-info"><div class="npc-name ${n.alive?'':'npc-dead'}">${n.name}</div><div class="npc-role">${n.relationship} &middot; ${n.alive?'Age '+n.age:'Deceased'}</div></div>${n.alive?`<div class="npc-bars"><div class="npc-bar-row"><span class="npc-bar-label">TR</span><div class="npc-bar-bg"><div class="npc-bar-fill trust-bar" style="width:${n.trust}%"></div></div></div><div class="npc-bar-row"><span class="npc-bar-label">CL</span><div class="npc-bar-bg"><div class="npc-bar-fill" style="width:${n.closeness}%"></div></div></div></div>`:''}</div>`).join('');
+    showModal('People',rows||'<p style="color:var(--text-muted);font-style:italic">No relationships yet.</p>');
+  }
+  else if(tab==='career')showModal('Career',`<div style="display:flex;flex-direction:column;gap:14px"><div><div class="panel-label">Role</div><div style="color:var(--text)">${G.career.title||'Unemployed'}</div></div><div><div class="panel-label">Salary</div><div style="color:var(--cyan);font-family:var(--fm)">${money(G.career.salary)}/yr</div></div><div><div class="panel-label">Career Level</div><div style="color:var(--text-dim)">${G.career.level}/10</div></div><div><div class="panel-label">Education</div><div style="color:var(--text-dim)">${G.education.stage||'None'}</div></div></div>`);
+  else if(tab==='assets')showModal('Assets & Finances',`<div style="display:flex;flex-direction:column;gap:14px"><div><div class="panel-label">Cash</div><div style="font-family:var(--fm);color:${G.finances.cash>=0?'var(--cyan)':'var(--danger)'}">${money(G.finances.cash)}</div></div><div><div class="panel-label">Debt</div><div style="font-family:var(--fm);color:${G.finances.debt>0?'var(--danger)':'var(--text-dim)'}">${money(G.finances.debt)}</div></div><div><div class="panel-label">Net Worth</div><div style="font-family:var(--fm);color:var(--orange)">${money(G.finances.netWorth)}</div></div><div><div class="panel-label">Annual Income</div><div style="font-family:var(--fm);color:var(--text-dim)">${money(G.finances.annualIncome)}</div></div></div>`);
+}
+
+/* === SECTION 15: GAME CONTROLLER === */
+function ageUp(){
+  if(G._awaiting)return;
+  G.age++;G.world.year++;
+  updateEducation();naturalDecay();crossStats();annualFinance();ageNPCs();decayRel();
+  if(!checkThresholds())return;
+  const ev=pickEvent();
+  if(ev){
+    G._currentEvent=ev;G._awaiting=true;
+    document.getElementById('btn-age-up').disabled=true;
+    renderEvent(ev);
+  } else {
+    addLog(G.age,'A quiet year passes.','general');
+  }
+  renderStats();save();
+}
+function makeChoice(idx){
+  if(!G._currentEvent)return;
+  const ev=G._currentEvent;const ch=ev.choices[idx];if(!ch)return;
+  applyOutcome(ch.outcome);
+  if(!G._fired.includes(ev.id))G._fired.push(ev.id);
+  addLog(G.age,ev.title,ev.category);
+  renderOutcome(ch.outcome);renderStats();
+  G._awaiting=false;G._currentEvent=null;
+  save();
+}
+function triggerDeath(cause){
+  G._causeOfDeath=cause;G._deathYear=G.world.year;save();
+  setTimeout(()=>renderDeath(),300);
+}
+
+/* === SECTION 16: INIT === */
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+id).classList.add('active');}
+function selectOpt(el,groupId){
+  const parent=document.getElementById(groupId);
+  parent.querySelectorAll('.select-option,.bg-option').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function getVal(groupId){const s=document.querySelector('#'+groupId+' .selected');return s?s.dataset.value:null;}
+function startGame(){
+  const name=document.getElementById('input-name').value.trim();
+  const gender=getVal('gender-select');
+  const country=document.getElementById('country-select').value;
+  const bg=getVal('bg-select');
+  if(!name){toast('Please enter your name.');return;}
+  if(!gender){toast('Please select a gender.');return;}
+  if(!country){toast('Please select a country.');return;}
+  if(!bg){toast('Please select a family background.');return;}
+  const birthYear=2000+rnd(0,10);
+  G=newState(name,gender,country,bg,birthYear);
+  addLog(0,'Born in '+country+'.','family');
+  renderStats();showScreen('game');save();
+}
+function continueGame(){
+  const s=loadSave();if(!s){toast('No save found.');return;}
+  G=s;renderStats();
+  document.getElementById('log-list').innerHTML='';
+  G.lifeLog.slice(-30).forEach(e=>{const d=document.createElement('div');d.className='log-entry';d.innerHTML=`<div class="log-entry-age">Age ${e.age}</div><div class="log-entry-title cat-${e.category||'general'}">${e.title}</div>`;document.getElementById('log-list').appendChild(d);});
+  document.getElementById('log-count').textContent=G.lifeLog.length+' events';
+  showScreen('game');
+}
+function newGame(){deleteSave();G=null;document.getElementById('input-name').value='';document.querySelectorAll('.select-option,.bg-option').forEach(o=>o.classList.remove('selected'));document.getElementById('country-select').value='';document.getElementById('log-list').innerHTML='';showScreen('create');}
+
+/* === HELPERS === */
+function clamp(v,mn,mx){return Math.min(mx,Math.max(mn,v));}
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function money(n){
+  if(!G)return'$0';
+  const cur=(COUNTRIES[G.country]?.currency||'$').replace(/&[^;]+;/g,'$');
+  const a=Math.abs(Math.round(n));
+  const f=a>=1000000?(a/1000000).toFixed(1)+'M':a>=1000?(a/1000).toFixed(0)+'K':a.toString();
+  return(n<0?'-':'')+cur+f;
+}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
+
+(function init(){if(hasSave())document.getElementById('btn-continue').disabled=false;})();
+</script>
+</body>
+</html>
