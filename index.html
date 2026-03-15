@@ -38,8 +38,9 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
   background:radial-gradient(ellipse at 50% 45%,transparent 35%,rgba(0,0,0,.45) 100%);
   pointer-events:none}
 .t-inner{display:flex;flex-direction:column;align-items:center;
-  padding:0 28px 60px;width:100%;max-width:500px;
-  position:relative;z-index:1;justify-content:center;flex:1;gap:0}
+  padding:48px 28px 80px;width:100%;max-width:500px;box-sizing:border-box;
+  position:relative;z-index:1;justify-content:center;flex:1;gap:0;
+  min-height:0;overflow:visible}
 .t-eye{font-family:var(--fm);font-size:10px;letter-spacing:.5em;color:var(--cyan);
   text-transform:uppercase;margin-bottom:28px;
   opacity:0;animation:slideUp .9s cubic-bezier(.16,1,.3,1) .2s forwards}
@@ -339,6 +340,12 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
 /* ── RESPONSIVE ── */
 @media(max-width:640px){
   :root{--th:44px;--bh:56px}
+  .t-inner{padding:20px 20px 40px;gap:0}
+  .t-logo{font-size:clamp(56px,18vw,90px);line-height:.85}
+  .t-eye{margin-bottom:16px}
+  .t-tag{margin-top:14px;font-size:clamp(13px,3.5vw,17px)}
+  .t-div{margin:22px auto}
+  .t-btns{gap:10px}
   .gbody{grid-template-columns:1fr}
   .pl,.pr{display:none}
   .pc{grid-column:1}
@@ -363,7 +370,16 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
   .ov{align-items:center}
   .mo{border-radius:6px;max-height:80vh}
 }
-</style>
+
+@media(max-width:480px){
+  .t-logo{font-size:clamp(60px,18vw,90px)}
+  .t-inner{padding:36px 20px 70px}
+  .t-tag{font-size:14px;margin-top:16px}
+  .t-div{margin:22px auto}
+  .t-btns{max-width:280px;gap:12px}
+  .t-hint{margin-top:10px}
+}</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
 </head>
 <body>
 
@@ -378,7 +394,7 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
       <button class="btn btn-p" onclick="showScreen('create')">NEW LIFE</button>
       <button class="btn btn-s" id="btn-continue" onclick="continueGame()" disabled>CONTINUE</button>
     </div>
-    <div class="t-hint">&#9834; Music starts when you begin</div>
+    <div class="t-hint">♪ Music starts when you begin</div>
   </div>
   <div class="t-ver">ORIGIN: ZERO &nbsp;·&nbsp; 2026</div>
 </div>
@@ -524,6 +540,11 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
 <div class="toast" id="toast"></div>
 
 <script>
+
+
+
+
+
 
 
 
@@ -3406,281 +3427,185 @@ function toast(msg){
 /* Watchdog: recover frozen game after 8s */
 setInterval(function(){
   if(!G||!G._awaiting||G._currentEvent)return;
-  G._awaiting=false;
-  _chainQueue=[];
+  G._awaiting=false; _chainQueue=[];
   var b=document.getElementById('btn-age');
   if(b)b.disabled=false;
 },8000);
 
 /* ================================================================
-   MUSIC ENGINE v7 — Web Audio API
-   No iframes. No third-party embeds. No permissions violations.
-   Generates ambient game music directly in the browser.
-   Works everywhere, starts instantly on user click.
+   MUSIC ENGINE — Howler.js + Local Files
+
+   HOW TO USE:
+   1. Create a folder called "music" next to this HTML file
+   2. Download each song and save with the exact filename shown
+   3. Open the HTML — music plays when you click Begin Your Life
+
+   FILE LIST:
+   music/burna-boy-ye.mp3          Burna Boy - Ye
+   music/wizkid-essence.mp3        Wizkid ft Tems - Essence
+   music/rema-calm-down.mp3        Rema - Calm Down
+   music/tems-free-mind.mp3        Tems - Free Mind
+   music/kendrick-humble.mp3       Kendrick Lamar - HUMBLE.
+   music/drake-gods-plan.mp3       Drake - God's Plan
+   music/travis-sicko-mode.mp3     Travis Scott - SICKO MODE
+   music/dua-lipa-levitating.mp3   Dua Lipa - Levitating
+   music/billie-eilish-bad-guy.mp3 Billie Eilish - bad guy
+   music/milky-chance-fado.mp3     Milky Chance - Fado
+   music/bj-feel-the-vibe.mp3      BJ the Chicago Kid - Feel The Vibe
+   music/cautious-clay-erase.mp3   Cautious Clay - Erase
+   music/skepta-same-old-story.mp3 Skepta - Same Old Story
+   music/major-lazer-que-calor.mp3 Major Lazer - Que Calor
+
+   Genre picks automatically based on career path + country + mood.
+   Missing files are silently skipped — only need a few to work.
    ================================================================ */
 
-var _ac=null;          /* AudioContext */
-var _mGain=null;       /* master gain */
-var _mOn=false;
-var _mGo=false;
-var _mNodes=[];        /* active oscillator nodes to stop */
-var _mTimer=null;
-var _mMood='neutral';
+var TRACKS = [
+  /* ── Afrobeats ── */
+  {src:'music/Burna-Boy-Ye.mp3',                                                title:'Burna Boy — Ye',                   genre:'afrobeat'},
+  {src:'music/WizKid-Ft-Tems-Essence.mp3',                                      title:'Wizkid ft Tems — Essence',         genre:'afrobeat'},
+  {src:'music/Rema-Calm-Down-file-1-(JustNaija.com).mp3',                       title:'Rema — Calm Down',                 genre:'afrobeat'},
+  {src:'music/Tems-Free-Mind-(JustNaija.com).mp3',                              title:'Tems — Free Mind',                 genre:'afrobeat'},
 
-/* ── Scales ─────────────────────────────────────────────────── */
-var SCALES={
-  afrobeat:  [0,2,4,7,9,12,14,16],   /* major pentatonic + 2 */
-  hiphop:    [0,3,5,7,10,12,15,17],  /* minor pentatonic */
-  chill:     [0,2,3,7,9,12,14,15],   /* dorian */
-  sad:       [0,2,3,7,9,12,14,15],   /* natural minor */
-  happy:     [0,2,4,5,7,9,11,12],    /* major */
-  tense:     [0,1,3,6,7,8,10,12],    /* diminished-ish */
-  sports:    [0,2,4,7,9,12,14,16],   /* major pentatonic driving */
-};
+  /* ── Hip-Hop ── */
+  {src:'music/Kendrick Lamar - Humble.mp3',                                     title:'Kendrick Lamar — HUMBLE.',         genre:'hiphop'},
+  {src:'music/Drake-Gods-Plan.mp3',                                             title:"Drake — God's Plan",               genre:'hiphop'},
+  {src:'music/Drake-Gods-Plan (1).mp3',                                         title:"Drake — God's Plan (Alt)",         genre:'hiphop'},
+  {src:'music/Travis Scott - SICKO MODE ft. Drake.mp3',                         title:'Travis Scott — SICKO MODE',        genre:'hiphop'},
 
-var MOODS={
-  afrobeat: {scale:'afrobeat', baseNote:60, tempo:118, reverb:.3, brightness:.7},
-  hiphop:   {scale:'hiphop',  baseNote:58, tempo:88,  reverb:.4, brightness:.4},
-  chill:    {scale:'chill',   baseNote:57, tempo:72,  reverb:.6, brightness:.4},
-  sad:      {scale:'sad',     baseNote:56, tempo:65,  reverb:.7, brightness:.2},
-  happy:    {scale:'happy',   baseNote:62, tempo:105, reverb:.25,brightness:.8},
-  tense:    {scale:'tense',   baseNote:55, tempo:95,  reverb:.5, brightness:.3},
-  sports:   {scale:'sports',  baseNote:60, tempo:130, reverb:.2, brightness:.9},
-};
+  /* ── Pop ── */
+  {src:'music/Nokia Drake (pagalall.com).mp3',                                  title:'Nokia — Drake',                    genre:'pop'},
+  {src:'music/The Weeknd, Playboi Carti, Madonna - Popular (Official Audio.mp3',title:'Popular — The Weeknd',             genre:'pop'},
 
-var TRACK_NAMES={
-  afrobeat:'Afrobeat Groove',
-  hiphop:  'Hip-Hop Atmosphere',
-  chill:   'Chill Wave',
-  sad:     'Quiet Hours',
-  happy:   'Good Days',
-  tense:   'Rising Tension',
-  sports:  'Training Montage',
-};
+  /* ── FIFA / Vibe ── */
+  {src:'music/BJ_The_Chicago_Kid_feat._Anderson_.Paak_-_Feel_The_Vibe_(mp3.pm).mp3', title:'BJ the Chicago Kid — Feel The Vibe', genre:'fifa'},
+  {src:'music/Cautious_Clay_-_Erase_(mp3.pm).mp3',                             title:'Cautious Clay — Erase',            genre:'fifa'},
+  {src:'music/Skepta_Joseph_Adenuga_-_Same_Old_Story_(mp3.pm).mp3',             title:'Skepta — Same Old Story',          genre:'fifa'},
 
-function _midiToHz(midi){
-  return 440*Math.pow(2,(midi-69)/12);
+  /* ── Afrobeats Extra ── */
+  {src:'music/LieNJIHTfBHVuDW2kaVQtbeekYq7tB-TG-pUex92CTPtAhgdKDF5eDlJ-ZGEYz7W_0T9z-EIUlLisy3b99Jgx1OjfbX4k9TWZVeLvS9mdzgnTwQzOkznjjl0osIYlL8EWw62WgmzIMnuku-m4c1uX5b6qaTjhWzD9ZcmBnELCoZbWfgHVQ.mp3', title:'Ruin — Usher ft. Pheelz', genre:'afrobeat'},
+];
+
+var _howl      = null;   /* current Howl instance */
+var _mOn       = false;  /* audio currently playing */
+var _mGo       = false;  /* user has started music */
+var _trackIdx  = 0;
+var _skipCount = 0;
+
+function _nextIdx(){
+  /* Pick by genre based on game state, then shuffle within that genre */
+  var genre=_pickGenre();
+  var pool=[];
+  for(var i=0;i<TRACKS.length;i++){
+    if(TRACKS[i].genre===genre) pool.push(i);
+  }
+  if(!pool.length){
+    /* fallback: any track except current */
+    for(var i=0;i<TRACKS.length;i++) if(i!==_trackIdx) pool.push(i);
+  }
+  if(!pool.length) return 0;
+  var pick=pool[Math.floor(Math.random()*pool.length)];
+  return pick;
 }
 
-function _pickMood(){
+function _pickGenre(){
   if(!G) return 'afrobeat';
   var cp=(G.career&&G.career.path)||'';
-  var age=G.age||0;
-  var happy=(G.stats&&G.stats.happiness)||50;
-  var country=G.country||'';
-  if(cp==='football'||cp==='basketball'||cp==='athletics') return 'sports';
+  var age=G.age||0, happy=(G.stats&&G.stats.happiness)||50, c=G.country||'';
+  if(cp==='football'||cp==='basketball'||cp==='athletics') return 'fifa';
   if(cp==='afrobeats') return 'afrobeat';
   if(cp==='hiphop')    return 'hiphop';
-  if(happy<25)         return 'sad';
-  if(happy<45)         return 'chill';
-  if(happy>75)         return 'happy';
-  if(country==='Nigeria'||country==='Ghana'||country==='Senegal'||
-     country==='Kenya'||country==='Ethiopia') return 'afrobeat';
-  if(country==='United States'||country==='Canada') return 'hiphop';
-  return 'chill';
+  if(cp==='rnb')       return 'pop';
+  if(age<13)           return 'afrobeat';
+  if(happy<35)         return 'pop';
+  if(c==='Nigeria'||c==='Ghana'||c==='Senegal'||c==='Kenya'||c==='Ethiopia') return 'afrobeat';
+  if(c==='United States'||c==='Canada') return Math.random()<0.5?'hiphop':'pop';
+  if(c==='United Kingdom') return Math.random()<0.5?'pop':'hiphop';
+  var genres=['afrobeat','hiphop','pop','fifa'];
+  return genres[Math.floor(Math.random()*genres.length)];
 }
 
-function _stopAll(){
-  _mNodes.forEach(function(n){
-    try{
-      if(n.stop) n.stop(0);
-      if(n.disconnect) n.disconnect();
-    }catch(e){}
-  });
-  _mNodes=[];
-  if(_mTimer){clearTimeout(_mTimer);_mTimer=null;}
-}
-
-function _makeReverb(ac, secs, decay){
-  var sr=ac.sampleRate;
-  var len=sr*secs;
-  var buf=ac.createBuffer(2,len,sr);
-  for(var c=0;c<2;c++){
-    var d=buf.getChannelData(c);
-    for(var i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,decay);
-  }
-  var conv=ac.createConvolver();
-  conv.buffer=buf;
-  return conv;
-}
-
-function _playMood(moodKey){
-  if(!_ac||!_mGain) return;
-  _stopAll();
-  _mMood=moodKey;
-
-  var mood=MOODS[moodKey]||MOODS.chill;
-  var scale=SCALES[mood.scale]||SCALES.chill;
-  var base=mood.baseNote;
-  var tempo=mood.tempo;
-  var beat=60/tempo;         /* seconds per beat */
-  var bright=mood.brightness;
-
-  setSongTitle(TRACK_NAMES[moodKey]||'Ambient');
-
-  /* Shared reverb */
-  var rev=_makeReverb(_ac, 2.5, 2);
-  var revGain=_ac.createGain();
-  revGain.gain.value=mood.reverb;
-  rev.connect(revGain);
-  revGain.connect(_mGain);
-
-  var dryGain=_ac.createGain();
-  dryGain.gain.value=1-mood.reverb;
-  dryGain.connect(_mGain);
-
-  /* Low-pass filter — controls brightness */
-  var filt=_ac.createBiquadFilter();
-  filt.type='lowpass';
-  filt.frequency.value=400+bright*6000;
-  filt.Q.value=1.2;
-  filt.connect(dryGain);
-  filt.connect(rev);
-
-  var now=_ac.currentTime+0.05;
-
-  /* ── Bass line ── */
-  var bassNotes=scale.filter(function(n){return n<12;});
-  var bassPattern=[0,0,4,7,0,0,7,4,0,0,3,7,0,0,5,7];
-  var bDur=beat*0.9;
-  for(var step=0;step<64;step++){
-    var patIdx=bassPattern[step%bassPattern.length];
-    var noteIdx=Math.floor(patIdx/12*bassNotes.length)%bassNotes.length;
-    var semitone=bassNotes[noteIdx]||0;
-    var freq=_midiToHz(base-24+semitone);
-    var t=now+step*beat;
-    var osc=_ac.createOscillator();
-    osc.type='sawtooth';
-    osc.frequency.value=freq;
-    var env=_ac.createGain();
-    env.gain.setValueAtTime(0,t);
-    env.gain.linearRampToValueAtTime(0.18,t+0.02);
-    env.gain.exponentialRampToValueAtTime(0.001,t+bDur);
-    osc.connect(env); env.connect(filt);
-    osc.start(t); osc.stop(t+bDur+0.05);
-    _mNodes.push(osc,env);
-  }
-
-  /* ── Chord pad ── */
-  var chords=[[0,4,7],[0,3,7],[5,9,12],[7,11,14]];
-  var chordDur=beat*4;
-  for(var ci=0;ci<16;ci++){
-    var chord=chords[ci%chords.length];
-    var ct=now+ci*chordDur;
-    chord.forEach(function(semi){
-      var freq=_midiToHz(base+semi);
-      var osc=_ac.createOscillator();
-      osc.type='sine';
-      osc.frequency.value=freq;
-      var env=_ac.createGain();
-      env.gain.setValueAtTime(0,ct);
-      env.gain.linearRampToValueAtTime(0.08,ct+0.3);
-      env.gain.setValueAtTime(0.08,ct+chordDur-0.4);
-      env.gain.linearRampToValueAtTime(0,ct+chordDur);
-      osc.connect(env); env.connect(filt);
-      osc.start(ct); osc.stop(ct+chordDur+0.05);
-      _mNodes.push(osc,env);
-    });
-  }
-
-  /* ── Melody ── */
-  var melPat=[0,2,4,7,4,2,0,3,5,7,9,7,5,3,2,0];
-  var melDur=beat*0.45;
-  for(var mi=0;mi<48;mi++){
-    if(Math.random()<0.35) continue; /* natural gaps */
-    var semi=scale[melPat[mi%melPat.length]%scale.length];
-    var oct=(mi%16<8)?12:0;
-    var freq=_midiToHz(base+semi+oct);
-    var mt=now+(mi*beat*0.5);
-    var osc=_ac.createOscillator();
-    osc.type=bright>0.6?'triangle':'sine';
-    osc.frequency.value=freq;
-    var env=_ac.createGain();
-    env.gain.setValueAtTime(0,mt);
-    env.gain.linearRampToValueAtTime(0.06,mt+0.03);
-    env.gain.exponentialRampToValueAtTime(0.001,mt+melDur);
-    osc.connect(env); env.connect(filt);
-    osc.start(mt); osc.stop(mt+melDur+0.05);
-    _mNodes.push(osc,env);
-  }
-
-  /* ── Hi-hat / percussion (noise bursts) ── */
-  for(var hi=0;hi<64;hi++){
-    if(Math.random()<0.4) continue;
-    var ht=now+hi*(beat*0.5);
-    var buf=_ac.createBuffer(1,_ac.sampleRate*0.05,_ac.sampleRate);
-    var data=buf.getChannelData(0);
-    for(var si=0;si<data.length;si++) data[si]=Math.random()*2-1;
-    var src=_ac.createBufferSource();
-    src.buffer=buf;
-    var hf=_ac.createBiquadFilter();
-    hf.type='highpass';
-    hf.frequency.value=8000;
-    var hg=_ac.createGain();
-    hg.gain.setValueAtTime(0,ht);
-    hg.gain.linearRampToValueAtTime(0.04,ht+0.003);
-    hg.gain.exponentialRampToValueAtTime(0.001,ht+0.04);
-    src.connect(hf); hf.connect(hg); hg.connect(dryGain);
-    src.start(ht); src.stop(ht+0.05);
-    _mNodes.push(src,hg);
-  }
-
-  /* Schedule next generation before this one ends */
-  var totalDur=64*beat+2;
-  _mTimer=setTimeout(function(){
-    if(_mOn&&_mGo) _playMood(_pickMood());
-  }, (totalDur-4)*1000);
-
-  _mOn=true;
-  _vizActive(true);
-  _mBtnSync();
-}
-
-/* ── Public API ─────────────────────────────────────────────── */
-function startMusic(){
-  _mGo=true;
-  if(!_ac){
-    try{
-      _ac=new(window.AudioContext||window.webkitAudioContext)();
-    }catch(e){
-      console.warn('Web Audio not supported');return;
+function _playIdx(idx){
+  /* Stop and unload previous */
+  if(_howl){try{_howl.stop();_howl.unload();}catch(e){} _howl=null;}
+  
+  _trackIdx=idx;
+  var track=TRACKS[idx];
+  setSongTitle(track.title);
+  
+  _howl=new Howl({
+    src:[track.src],
+    html5:true,          /* stream without full download, better mobile support */
+    volume:0.55,
+    autoplay:false,      /* we call .play() explicitly */
+    preload:true,
+    onplay:function(){
+      _mOn=true;_skipCount=0;
+      _vizActive(true);_mBtnSync();
+    },
+    onpause:function(){
+      _mOn=false;_vizActive(false);_mBtnSync();
+    },
+    onstop:function(){
+      _mOn=false;_vizActive(false);_mBtnSync();
+    },
+    onend:function(){
+      /* Auto-advance to next track */
+      _mOn=false;
+      if(_mGo) _playIdx(_nextIdx());
+    },
+    onloaderror:function(id,err){
+      /* Error 4 = file not found. Log clearly and stop - don't loop. */
+      var t=TRACKS[_trackIdx];
+      if(err===4){
+        console.warn('[Music] File not found: '+t.src+'. Put MP3s in a music/ folder next to the HTML file.');
+        setSongTitle('No music files found');
+      } else {
+        console.warn('[Music] Load error '+err+' for: '+t.src);
+        _skipCount++;
+        if(_mGo&&_skipCount<TRACKS.length) _playIdx(_nextIdx());
+      }
+    },
+    onplayerror:function(id,err){
+      /* Howler's recommended fallback for autoplay policy */
+      var self=this;
+      self.once('unlock',function(){ self.play(); });
     }
-    _mGain=_ac.createGain();
-    _mGain.gain.value=0.55;
-    _mGain.connect(_ac.destination);
-  }
-  if(_ac.state==='suspended') _ac.resume();
-  _playMood(_pickMood());
+  });
+  
+  _howl.play();
+}
+
+function advanceTrack(){
+  if(_mGo) _playIdx(_nextIdx());
+}
+
+function startMusic(){
+  if(_mGo)return;
+  _mGo=true;
+  _playIdx(Math.floor(Math.random()*TRACKS.length));
 }
 
 function pauseMusic(){
-  _mOn=false;_mGo=false;
-  _stopAll();
-  if(_ac&&_ac.state==='running') _ac.suspend();
+  _mGo=false;_mOn=false;
+  if(_howl){try{_howl.pause();}catch(e){}}
   _vizActive(false);_mBtnSync();
 }
 
 function resumeMusic(){
   if(!_mGo){startMusic();return;}
-  if(_ac&&_ac.state==='suspended') _ac.resume();
-  _mGo=true;_mOn=true;
-  _playMood(_mMood);
-  _vizActive(true);_mBtnSync();
-}
-
-function advanceTrack(){
-  if(_mGo) _playMood(_pickMood());
+  if(_howl){try{_howl.play();}catch(e){}}
+  else _playIdx(_trackIdx);
 }
 
 function toggleMusic(){
-  if(!_mGo)startMusic();
-  else if(_mOn)pauseMusic();
-  else resumeMusic();
+  if(!_mGo){startMusic();return;}
+  if(_mOn)pauseMusic();else resumeMusic();
 }
 
 function setSongTitle(t){
   var el=document.getElementById('np-text')||document.getElementById('now-playing');
-  if(el) el.textContent=t||'';
+  if(el)el.textContent=t||'';
 }
 
 function _vizActive(on){
@@ -3694,11 +3619,14 @@ function _mBtnSync(){
   var b=document.getElementById('mbtn')||document.getElementById('music-btn')||document.getElementById('music-toggle');
   if(!b)return;
   b.innerHTML=_mOn?'&#9646;&#9646;':'&#9654;';
-  b.title=_mOn?'Pause':'Play';
+  b.title=_mOn?'Pause music':'Play music';
 }
 
+/* startMusicAndGame — called DIRECTLY from the button onclick.
+   Creating the Howl and calling .play() here means we are still
+   inside the user gesture call stack. Autoplay is allowed. */
 function startMusicAndGame(){
-  startMusic();
+  startMusic();   /* <-- inside user gesture, browser allows audio */
   startGame();
 }
 
@@ -3708,8 +3636,11 @@ newGame=function(){
   _origNewGame();
 };
 
+
+
+
+
 </script>
 
-<!-- YouTube audio --></iframe>
 </body>
 </html>
