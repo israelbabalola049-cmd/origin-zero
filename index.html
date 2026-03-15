@@ -60,8 +60,7 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
 #screen-title::after{content:'';position:absolute;inset:0;
   background:radial-gradient(ellipse at 50% 45%,transparent 35%,rgba(0,0,0,.45) 100%);
   pointer-events:none}
-.t-inner{display:flex;flex-direction:column;align-items:center;
-  padding:15vh 28px 40px;width:100%;max-width:500px;
+.t-inner{display:flex;flex-direction:column;align-items:center;padding:15vh 28px 40px;width:100%;max-width:500px;
   position:relative;z-index:1;gap:0}
 .t-eye{font-family:var(--fm);font-size:10px;letter-spacing:.5em;color:var(--cyan);
   text-transform:uppercase;margin-bottom:28px;
@@ -408,7 +407,6 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
 
 @media(max-width:480px){
 }</style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
 </head>
 <body>
 
@@ -3342,7 +3340,7 @@ function makeChoice(idx){
   G._awaiting=false;G._currentEvent=null;
 
   if(_chainQueue.length>0){
-    setTimeout(()=>{
+    setTimeout(function(){
       try{
         var next=popChain();
         if(next&&next.choices&&next.choices.length){
@@ -3488,76 +3486,53 @@ setInterval(function(){
    Missing files are silently skipped — only need a few to work.
    ================================================================ */
 
-var TRACKS = [
-  /* ── Fixed order ── */
-  {src:'music/Cautious_Clay_-_Erase_(mp3.pm).mp3',                               title:'Cautious Clay \u2014 Erase',                    genre:'fifa'},
-  {src:'music/LieNJIHTfBHVuDW2kaVQtbeekYq7tB-TG-pUex92CTPtAhgdKDF5eDlJ-ZGEYz7W_0T9z-EIUlLisy3b99Jgx1OjfbX4k9TWZVeLvS9mdzgnTwQzOkznjjl0osIYlL8EWw62WgmzIMnuku-m4c1uX5b6qaTjhWzD9ZcmBnELCoZbWfgHVQ.mp3', title:'Ruin \u2014 Usher ft. Pheelz', genre:'afrobeat'},
-  {src:'music/BJ_The_Chicago_Kid_feat._Anderson_.Paak_-_Feel_The_Vibe_(mp3.pm).mp3', title:'BJ the Chicago Kid \u2014 Feel The Vibe', genre:'fifa'},
-  {src:'music/Tems-Free-Mind-(JustNaija.com).mp3',                                title:'Tems \u2014 Free Mind',                         genre:'afrobeat'},
-  {src:'music/WizKid-Ft-Tems-Essence.mp3',                                        title:'Wizkid ft Tems \u2014 Essence',                 genre:'afrobeat'},
-  {src:'music/Burna-Boy-Ye.mp3',                                                  title:'Burna Boy \u2014 Ye',                           genre:'afrobeat'},
-  {src:'music/Rema-Calm-Down-file-1-(JustNaija.com).mp3',                         title:'Rema \u2014 Calm Down',                         genre:'afrobeat'},
-  {src:'music/One Dance - Drake, Wizkid & Kyla.mp3',                              title:'One Dance \u2014 Drake ft. Wizkid & Kyla',      genre:'afrobeat'},
-  {src:'music/Nokia Drake (pagalall.com).mp3',                                    title:'Nokia \u2014 Drake',                            genre:'pop'},
-  /* ── Randomized pool ── */
-  {src:'music/Kendrick Lamar - Humble.mp3',                                       title:'Kendrick Lamar \u2014 HUMBLE.',                 genre:'hiphop'},
-  {src:'music/Drake-Gods-Plan.mp3',                                               title:"Drake \u2014 God's Plan",                       genre:'hiphop'},
-  {src:'music/Drake-Gods-Plan (1).mp3',                                           title:"Drake \u2014 God's Plan (Alt)",                 genre:'hiphop'},
-  {src:'music/Travis Scott - SICKO MODE ft. Drake.mp3',                           title:'Travis Scott \u2014 SICKO MODE',                genre:'hiphop'},
-  {src:'music/The Weeknd, Playboi Carti, Madonna - Popular (Official Audio).mp3', title:'Popular \u2014 The Weeknd',                     genre:'pop'},
-  {src:'music/Skepta_Joseph_Adenuga_-_Same_Old_Story_(mp3.pm).mp3',               title:'Skepta \u2014 Same Old Story',                  genre:'fifa'},
+var YOUTUBE_TRACKS = [
+  /* ── Fixed sequence plays first ── */
+  {id:'G6C1VWp1Bcs', t:'Cautious Clay \u2014 Erase',           g:'fifa'},
+  {id:'jipQpjUA_o8', t:'Wizkid ft Tems \u2014 Essence',        g:'afrobeat'},
+  {id:'VwkPvSQA9cY', t:'Tems \u2014 Free Mind',                g:'afrobeat'},
+  {id:'lPe09eE6Xio', t:'Burna Boy \u2014 Ye',                  g:'afrobeat'},
+  {id:'eR3-bHHRKLU', t:'Rema \u2014 Calm Down',                g:'afrobeat'},
+  {id:'YQFk_1-43A4', t:'BJ the Chicago Kid \u2014 Feel The Vibe', g:'fifa'},
+  {id:'PKoaM2e8I6c', t:'Davido \u2014 Fall',                   g:'afrobeat'},
+  {id:'IrjAWNV_bio', t:'Omah Lay \u2014 Bad Influence',         g:'afrobeat'},
+  {id:'ZAH5ZsCQ_Lc', t:'Asake \u2014 Joha',                    g:'afrobeat'},
+  /* ── Pool ── */
+  {id:'tvTRZJ-4EyI', t:'Kendrick Lamar \u2014 HUMBLE.',         g:'hiphop'},
+  {id:'xpVfcZ0ZcFM', t:"Drake \u2014 God's Plan",              g:'hiphop'},
+  {id:'6ONRf7h3Mdk', t:'Travis Scott \u2014 SICKO MODE',        g:'hiphop'},
+  {id:'ZHwVBirqD2s', t:'Kendrick Lamar \u2014 Not Like Us',     g:'hiphop'},
+  {id:'OPf0YbXqDm0', t:'The Weeknd \u2014 Blinding Lights',     g:'pop'},
+  {id:'04854XqcfBg', t:'Harry Styles \u2014 As It Was',         g:'pop'},
+  {id:'92cwKCU8Z5c', t:'Dua Lipa \u2014 Levitating',            g:'pop'},
+  {id:'Us3UHljOTFA', t:'SZA \u2014 Good Days',                  g:'rnb'},
+  {id:'F_56lxrr-3A', t:'Tems \u2014 Damage',                    g:'rnb'},
+  {id:'8BIhn4VFuDE', t:'Daniel Caesar \u2014 Get You',          g:'rnb'},
+  {id:'dX3k_QDnRwo', t:'Glass Animals \u2014 Heat Waves',       g:'fifa'},
+  {id:'ROHN61Q3KdQ', t:'Milky Chance \u2014 Fado',              g:'fifa'},
+  {id:'BacFKGHCLYs', t:'Skepta \u2014 Same Old Story',          g:'fifa'},
+  {id:'3YqWWYhDz3g', t:'Fireboy DML \u2014 Peru',               g:'afrobeat'},
+  {id:'lYwlvZaFiI8', t:'Kizz Daniel \u2014 Buga',               g:'afrobeat'},
 ];
 
-var _FIXED_COUNT = 9;
-var _howl        = null;
-var _mOn         = false;
-var _mGo         = false;
-var _trackIdx    = 0;
-var _playedFixed = false;
-var _skipCount   = 0;
+var _FIXED_END  = 9;
+var _mOn        = false;
+var _mGo        = false;
+var _mIdx       = 0;
+var _mFixed     = false;
+var _mTimer     = null;
 
-/* Detect iOS Safari — needs html5:true to decode local MP3 files */
-var _isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) ||
-             (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
-/* On iOS, unlock audio on first touchend so AudioContext is ready */
-(function(){
-  function _unlock(){
-    try{
-      var ctx = Howler.ctx;
-      if(ctx && ctx.state === 'suspended') ctx.resume();
-    }catch(e){}
-    document.removeEventListener('touchend', _unlock);
-    document.removeEventListener('click',    _unlock);
+/* Hidden iframe for YouTube audio */
+function _getFrame(){
+  var fr = document.getElementById('yt-frame');
+  if(!fr){
+    fr = document.createElement('iframe');
+    fr.id = 'yt-frame';
+    fr.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:2px;height:2px;border:0;pointer-events:none;z-index:-1';
+    fr.allow = 'autoplay; encrypted-media';
+    document.body.appendChild(fr);
   }
-  document.addEventListener('touchend', _unlock, {once:true, passive:true});
-  document.addEventListener('click',    _unlock, {once:true});
-})();
-
-/* Resume when returning from background / tab switch */
-document.addEventListener('visibilitychange', function(){
-  if(document.hidden) return;
-  try{
-    var ctx = Howler.ctx;
-    if(ctx && ctx.state === 'suspended') ctx.resume();
-  }catch(e){}
-  if(_mGo && _howl && !_mOn){
-    try{ _howl.play(); }catch(e){}
-  }
-});
-
-function _nextIdx(){
-  if(!_playedFixed && _trackIdx < _FIXED_COUNT - 1) return _trackIdx + 1;
-  _playedFixed = true;
-  var genre = _pickGenre();
-  var pool = [];
-  for(var i = 0; i < TRACKS.length; i++){
-    if(TRACKS[i].genre === genre && i !== _trackIdx) pool.push(i);
-  }
-  if(!pool.length){
-    for(var i = 0; i < TRACKS.length; i++) if(i !== _trackIdx) pool.push(i);
-  }
-  return pool.length ? pool[Math.floor(Math.random() * pool.length)] : 0;
+  return fr;
 }
 
 function _pickGenre(){
@@ -3568,90 +3543,72 @@ function _pickGenre(){
   if(cp==='football'||cp==='basketball'||cp==='athletics') return 'fifa';
   if(cp==='afrobeats') return 'afrobeat';
   if(cp==='hiphop')    return 'hiphop';
-  if(happy < 35)       return 'pop';
+  if(cp==='rnb')       return 'rnb';
+  if(happy < 35)       return 'rnb';
   if(c==='Nigeria'||c==='Ghana'||c==='Senegal'||c==='Kenya'||c==='Ethiopia') return 'afrobeat';
   if(c==='United States'||c==='Canada') return Math.random()<0.5?'hiphop':'pop';
-  if(c==='United Kingdom') return Math.random()<0.5?'pop':'hiphop';
-  var genres = ['afrobeat','hiphop','pop','fifa'];
-  return genres[Math.floor(Math.random() * genres.length)];
+  if(c==='United Kingdom') return Math.random()<0.5?'pop':'rnb';
+  var gs = ['afrobeat','hiphop','pop','rnb','fifa'];
+  return gs[Math.floor(Math.random() * gs.length)];
 }
 
-function _playIdx(idx){
-  /* Stop and unload previous */
-  if(_howl){
-    try{ _howl.stop(); _howl.unload(); }catch(e){}
-    _howl = null;
+function _nextTrack(){
+  if(!_mFixed && _mIdx < _FIXED_END - 1){
+    _mIdx++;
+    return _mIdx;
   }
-
-  _trackIdx = idx;
-  var track = TRACKS[idx];
-  setSongTitle(track.title);
-  _howl = new Howl({
-    src:     [track.src],
-    html5:   true,   /* html5:true works on ALL platforms — iOS, Android, desktop */
-    volume:  0.55,
-    preload: true,
-    format:  ['mp3'],
-
-    onplay: function(){
-      _mOn = true; _skipCount = 0;
-      _vizActive(true); _mBtnSync();
-    },
-    onpause: function(){
-      _mOn = false; _vizActive(false); _mBtnSync();
-    },
-    onstop: function(){
-      _mOn = false; _vizActive(false); _mBtnSync();
-    },
-    onend: function(){
-      _mOn = false;
-      if(_mGo) _playIdx(_nextIdx());
-    },
-
-    onloaderror: function(id, err){
-      _skipCount++;
-      if(err === 4){
-        /* File not found — skip silently */
-        setSongTitle('');
-      } else {
-        console.warn('[Music] Load error', err, TRACKS[_trackIdx].src);
-      }
-      if(_mGo && _skipCount < TRACKS.length) _playIdx(_nextIdx());
-    },
-
-    onplayerror: function(id, err){
-      /* AudioContext still locked — Howler will unlock on next interaction */
-      var self = this;
-      self.once('unlock', function(){ self.play(); });
+  _mFixed = true;
+  var genre = _pickGenre();
+  var pool = [];
+  for(var i = 0; i < YOUTUBE_TRACKS.length; i++){
+    if(YOUTUBE_TRACKS[i].g === genre && i !== _mIdx) pool.push(i);
+  }
+  if(!pool.length){
+    for(var i = 0; i < YOUTUBE_TRACKS.length; i++){
+      if(i !== _mIdx) pool.push(i);
     }
-  });
-  _howl.play();
+  }
+  _mIdx = pool.length ? pool[Math.floor(Math.random() * pool.length)] : 0;
+  return _mIdx;
+}
+
+function _playTrack(idx){
+  var track = YOUTUBE_TRACKS[idx];
+  var fr    = _getFrame();
+  /* autoplay=1 + mute=0 requires prior user gesture — we call this from button click */
+  fr.src = 'https://www.youtube.com/embed/' + track.id +
+           '?autoplay=1&controls=0&rel=0&playsinline=1&modestbranding=1&enablejsapi=1';
+  _mIdx = idx;
+  setSongTitle(track.t);
+  _mOn = true;
+  _vizActive(true);
+  _mBtnSync();
+  /* Auto-advance after ~4 min */
+  if(_mTimer) clearTimeout(_mTimer);
+  _mTimer = setTimeout(function(){
+    if(_mGo) _playTrack(_nextTrack());
+  }, 240000);
 }
 
 function startMusic(){
   if(_mGo) return;
-  _mGo = true;
-  _playedFixed = false;
-  /* Resume AudioContext synchronously — we are inside a user gesture right now */
-  try{
-    if(Howler.ctx && Howler.ctx.state === 'suspended') Howler.ctx.resume();
-  }catch(e){}
-  _playIdx(0);
+  _mGo  = true;
+  _mFixed = false;
+  _mIdx = 0;
+  _playTrack(0);
 }
 
 function pauseMusic(){
   _mGo = false; _mOn = false;
-  if(_howl){ try{ _howl.pause(); }catch(e){} }
+  var fr = document.getElementById('yt-frame');
+  if(fr) fr.src = 'about:blank';
+  if(_mTimer) clearTimeout(_mTimer);
   _vizActive(false); _mBtnSync();
 }
 
 function resumeMusic(){
   if(!_mGo){ startMusic(); return; }
-  try{
-    if(Howler.ctx && Howler.ctx.state === 'suspended') Howler.ctx.resume();
-  }catch(e){}
-  if(_howl && !_mOn){ try{ _howl.play(); }catch(e){} }
-  else if(!_howl) _playIdx(_trackIdx);
+  _playTrack(_mIdx);
 }
 
 function toggleMusic(){
@@ -3660,27 +3617,25 @@ function toggleMusic(){
 }
 
 function setSongTitle(t){
-  var el = document.getElementById('np-text') || document.getElementById('now-playing');
+  var el = document.getElementById('np-text');
   if(el) el.textContent = t || '';
 }
 
 function _vizActive(on){
   var v = document.getElementById('viz');
   if(!v) return;
-  if(on){ v.classList.add('on'); v.classList.add('playing'); }
-  else  { v.classList.remove('on'); v.classList.remove('playing'); }
+  if(on){ v.classList.add('on'); }
+  else  { v.classList.remove('on'); }
 }
 
 function _mBtnSync(){
-  var b = document.getElementById('mbtn') || document.getElementById('music-toggle') || document.getElementById('music-btn');
+  var b = document.getElementById('mbtn');
   if(!b) return;
   b.innerHTML = _mOn ? '&#9646;&#9646;' : '&#9654;';
-  b.title = _mOn ? 'Pause music' : 'Play music';
+  b.title     = _mOn ? 'Pause' : 'Play';
 }
 
-/* startMusicAndGame is called directly from the BEGIN YOUR LIFE button onclick.
-   Being inside the click handler means we are inside a user gesture —
-   both iOS and desktop browsers allow audio play() here. */
+/* Called from BEGIN YOUR LIFE button — inside user gesture */
 function giveUp(){
   if(!G) return;
   showModal('End This Life?',
@@ -3693,10 +3648,10 @@ function giveUp(){
 }
 function confirmGiveUp(){
   closeModal();
-  G._causeOfDeath='Chose to walk away';
-  G._deathYear=G.world?G.world.year:2024;
+  G._causeOfDeath = 'Chose to walk away';
+  G._deathYear = G.world ? G.world.year : 2024;
   save(); pauseMusic();
-  setTimeout(function(){renderDeath();},350);
+  setTimeout(function(){renderDeath();}, 350);
 }
 
 function startMusicAndGame(){
@@ -3707,8 +3662,10 @@ function startMusicAndGame(){
 var _origNewGame = newGame;
 newGame = function(){
   pauseMusic();
+  _mGo = false; _mFixed = false; _mIdx = 0;
   _origNewGame();
 };
+
 
 </script>
 
