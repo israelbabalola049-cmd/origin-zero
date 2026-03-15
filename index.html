@@ -3461,29 +3461,24 @@ setInterval(function(){
    ================================================================ */
 
 var TRACKS = [
-  /* ── Afrobeats ── */
-  {src:'music/Burna-Boy-Ye.mp3',                                                title:'Burna Boy — Ye',                   genre:'afrobeat'},
-  {src:'music/WizKid-Ft-Tems-Essence.mp3',                                      title:'Wizkid ft Tems — Essence',         genre:'afrobeat'},
-  {src:'music/Rema-Calm-Down-file-1-(JustNaija.com).mp3',                       title:'Rema — Calm Down',                 genre:'afrobeat'},
-  {src:'music/Tems-Free-Mind-(JustNaija.com).mp3',                              title:'Tems — Free Mind',                 genre:'afrobeat'},
+  /* ── Fixed order (plays in this sequence first) ── */
+  {src:'music/Cautious_Clay_-_Erase_(mp3.pm).mp3',                               title:'Cautious Clay — Erase',                      genre:'fifa'},
+  {src:'music/LieNJIHTfBHVuDW2kaVQtbeekYq7tB-TG-pUex92CTPtAhgdKDF5eDlJ-ZGEYz7W_0T9z-EIUlLisy3b99Jgx1OjfbX4k9TWZVeLvS9mdzgnTwQzOkznjjl0osIYlL8EWw62WgmzIMnuku-m4c1uX5b6qaTjhWzD9ZcmBnELCoZbWfgHVQ.mp3', title:'Ruin — Usher ft. Pheelz',              genre:'afrobeat'},
+  {src:'music/BJ_The_Chicago_Kid_feat._Anderson_.Paak_-_Feel_The_Vibe_(mp3.pm).mp3', title:'BJ the Chicago Kid — Feel The Vibe',    genre:'fifa'},
+  {src:'music/Tems-Free-Mind-(JustNaija.com).mp3',                                title:'Tems — Free Mind',                           genre:'afrobeat'},
+  {src:'music/WizKid-Ft-Tems-Essence.mp3',                                        title:'Wizkid ft Tems — Essence',                   genre:'afrobeat'},
+  {src:'music/Burna-Boy-Ye.mp3',                                                  title:'Burna Boy — Ye',                             genre:'afrobeat'},
+  {src:'music/Rema-Calm-Down-file-1-(JustNaija.com).mp3',                         title:'Rema — Calm Down',                           genre:'afrobeat'},
+  {src:'493.Drake、Wizkid、Kyla - One Dance.mp3', title: 'One dance - Drake ft Wizkid & Kyla', genre: 'afrobeat'},
+  {src:'music/Nokia Drake (pagalall.com).mp3',                                    title:'Nokia — Drake',                              genre:'pop'},
 
-  /* ── Hip-Hop ── */
-  {src:'music/Kendrick Lamar - Humble.mp3',                                     title:'Kendrick Lamar — HUMBLE.',         genre:'hiphop'},
-  {src:'music/Drake-Gods-Plan.mp3',                                             title:"Drake — God's Plan",               genre:'hiphop'},
-  {src:'music/Drake-Gods-Plan (1).mp3',                                         title:"Drake — God's Plan (Alt)",         genre:'hiphop'},
-  {src:'music/Travis Scott - SICKO MODE ft. Drake.mp3',                         title:'Travis Scott — SICKO MODE',        genre:'hiphop'},
-
-  /* ── Pop ── */
-  {src:'music/Nokia Drake (pagalall.com).mp3',                                  title:'Nokia — Drake',                    genre:'pop'},
-  {src:'music/The Weeknd, Playboi Carti, Madonna - Popular (Official Audio).mp3',title:'Popular — The Weeknd',             genre:'pop'},
-
-  /* ── FIFA / Vibe ── */
-  {src:'music/BJ_The_Chicago_Kid_feat._Anderson_.Paak_-_Feel_The_Vibe_(mp3.pm).mp3', title:'BJ the Chicago Kid — Feel The Vibe', genre:'fifa'},
-  {src:'music/Cautious_Clay_-_Erase_(mp3.pm).mp3',                             title:'Cautious Clay — Erase',            genre:'fifa'},
-  {src:'music/Skepta_Joseph_Adenuga_-_Same_Old_Story_(mp3.pm).mp3',             title:'Skepta — Same Old Story',          genre:'fifa'},
-
-  /* ── Afrobeats Extra ── */
-  {src:'music/LieNJIHTfBHVuDW2kaVQtbeekYq7tB-TG-pUex92CTPtAhgdKDF5eDlJ-ZGEYz7W_0T9z-EIUlLisy3b99Jgx1OjfbX4k9TWZVeLvS9mdzgnTwQzOkznjjl0osIYlL8EWw62WgmzIMnuku-m4c1uX5b6qaTjhWzD9ZcmBnELCoZbWfgHVQ.mp3', title:'Ruin — Usher ft. Pheelz', genre:'afrobeat'},
+  /* ── Randomized pool ── */
+  {src:'music/Kendrick Lamar - Humble.mp3',                                       title:'Kendrick Lamar — HUMBLE.',                   genre:'hiphop'},
+  {src:'music/Drake-Gods-Plan.mp3',                                               title:"Drake — God's Plan",                         genre:'hiphop'},
+  {src:'music/Drake-Gods-Plan (1).mp3',                                           title:"Drake — God's Plan (Alt)",                   genre:'hiphop'},
+  {src:'music/Travis Scott - SICKO MODE ft. Drake.mp3',                           title:'Travis Scott — SICKO MODE',                  genre:'hiphop'},
+  {src:'music/The Weeknd, Playboi Carti, Madonna - Popular (Official Audio).mp3', title:'Popular — The Weeknd',                       genre:'pop'},
+  {src:'music/Skepta_Joseph_Adenuga_-_Same_Old_Story_(mp3.pm).mp3',               title:'Skepta — Same Old Story',                    genre:'fifa'},
 ];
 
 var _howl      = null;   /* current Howl instance */
@@ -3492,20 +3487,28 @@ var _mGo       = false;  /* user has started music */
 var _trackIdx  = 0;
 var _skipCount = 0;
 
+/* First 9 tracks play in fixed order on first listen.
+   After that, randomize from the full pool by genre. */
+var _FIXED_COUNT = 9;   /* number of tracks in the fixed sequence */
+var _playedFixed = false;
+
 function _nextIdx(){
-  /* Pick by genre based on game state, then shuffle within that genre */
-  var genre=_pickGenre();
-  var pool=[];
-  for(var i=0;i<TRACKS.length;i++){
-    if(TRACKS[i].genre===genre) pool.push(i);
+  /* If we're still in the fixed sequence, advance linearly */
+  if(_trackIdx < _FIXED_COUNT - 1){
+    return _trackIdx + 1;
+  }
+  /* After fixed sequence, pick by genre from the full pool */
+  _playedFixed = true;
+  var genre = _pickGenre();
+  var pool = [];
+  for(var i = 0; i < TRACKS.length; i++){
+    if(TRACKS[i].genre === genre && i !== _trackIdx) pool.push(i);
   }
   if(!pool.length){
-    /* fallback: any track except current */
-    for(var i=0;i<TRACKS.length;i++) if(i!==_trackIdx) pool.push(i);
+    for(var i = 0; i < TRACKS.length; i++) if(i !== _trackIdx) pool.push(i);
   }
   if(!pool.length) return 0;
-  var pick=pool[Math.floor(Math.random()*pool.length)];
-  return pick;
+  return pool[Math.floor(Math.random() * pool.length)];
 }
 
 function _pickGenre(){
@@ -3583,7 +3586,8 @@ function advanceTrack(){
 function startMusic(){
   if(_mGo)return;
   _mGo=true;
-  _playIdx(Math.floor(Math.random()*TRACKS.length));
+  _playedFixed=false;
+  _playIdx(0);  /* always starts with Erase, then follows fixed sequence */
 }
 
 function pauseMusic(){
