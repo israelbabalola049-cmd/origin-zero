@@ -66,8 +66,8 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
   opacity:0;animation:slideUp .7s ease 1.45s forwards}
 
 /* ── MUSIC SYSTEM ── */
-#yt-player{position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;
-  border:0;opacity:0;pointer-events:none;z-index:-99}
+#yt-player{position:fixed;top:-9999px;left:-9999px;width:2px;height:2px;
+  border:0;pointer-events:none;z-index:-1;overflow:hidden}
 .viz-wrap{display:flex;align-items:center;gap:6px;flex-shrink:0;overflow:hidden}
 .viz{display:flex;align-items:flex-end;gap:2px;height:14px;flex-shrink:0}
 .vb{width:3px;border-radius:2px;background:var(--cyan);min-height:3px;
@@ -414,7 +414,7 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
         <div class="bg-opt" data-value="elite" onclick="selOpt(this,'bg-sel')"><span class="bg-lbl">Elite</span><span class="bg-sub">Born into everything</span></div>
       </div>
     </div>
-    <div class="cr-act"><button class="btn btn-s" onclick="showScreen('title')">BACK</button><button class="btn btn-p" onclick="startGame()">BEGIN YOUR LIFE</button></div>
+    <div class="cr-act"><button class="btn btn-s" onclick="showScreen('title')">BACK</button><button class="btn btn-p" onclick="startMusicAndGame()">BEGIN YOUR LIFE</button></div>
   </div>
 </div>
 
@@ -498,8 +498,7 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
           <button class="tab" onclick="openTab(this,'log')">LOG</button>
         </div>
         <button class="btn btn-age" id="btn-age" onclick="ageUp()">AGE UP</button>
-        <button onclick="giveUp()" title="Surrender" style="background:transparent;border:1px solid var(--border);color:var(--muted);font-size:14px;padding:0 12px;height:42px;width:auto;cursor:pointer;border-radius:3px;flex-shrink:0;transition:color .2s,border-color .2s" onmouseover="this.style.borderColor='var(--danger)';this.style.color='var(--danger)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">&#9760;</button>
-        <button onclick="giveUp()" title="Surrender" style="background:transparent;border:1px solid var(--border);color:var(--muted);font-size:14px;padding:0 12px;height:42px;width:auto;cursor:pointer;border-radius:3px;flex-shrink:0;transition:all .15s;-webkit-tap-highlight-color:transparent" onmouseover="this.style.borderColor='var(--danger)';this.style.color='var(--danger)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">&#9760;</button>
+        <button onclick="giveUp()" title="Surrender — end this life" style="background:transparent;border:1px solid var(--border);color:var(--muted);font-size:15px;padding:0 12px;height:42px;width:auto;cursor:pointer;border-radius:3px;flex-shrink:0;transition:color .2s,border-color .2s;-webkit-tap-highlight-color:transparent" onmouseover="this.style.borderColor='var(--danger)';this.style.color='var(--danger)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">&#9760;</button>
       </div>
     </div>
     <!-- Right panel — log -->
@@ -525,6 +524,7 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
 <div class="toast" id="toast"></div>
 
 <script>
+
 
 
 /* === SECTION 1: CONSTANTS & DATA LIBRARIES === */
@@ -3468,8 +3468,10 @@ function _pickGenre() {
 function playSong(videoId, title) {
   var fr = document.getElementById('yt-player');
   if (!fr) return;
+  /* Force iframe reload by removing src first, then setting new one */
+  fr.src = '';
   fr.src = 'https://www.youtube.com/embed/' + videoId +
-    '?enablejsapi=1&autoplay=1&controls=0&modestbranding=1&rel=0&playsinline=1&fs=0&iv_load_policy=3';
+    '?enablejsapi=1&autoplay=1&controls=0&modestbranding=1&rel=0&playsinline=1&fs=0&iv_load_policy=3&origin=' + encodeURIComponent(window.location.origin||'null');
   setSongTitle(title);
   _musicPlaying = true;
   _vizActive(true);
@@ -3785,11 +3787,12 @@ function getShopItems(cat) {
 }
 
 /* ── HOOK startGame and newGame ─────────────────────────── */
-var _origStartGame = startGame;
-startGame = function() {
-  _origStartGame();
-  setTimeout(function() { startMusic(); }, 1200);
-};
+/* startMusicAndGame: called directly from button — synchronous user gesture
+   means the browser will allow YouTube autoplay */
+function startMusicAndGame() {
+  startMusic();
+  startGame();
+}
 
 var _origNewGame = newGame;
 newGame = function() {
@@ -3798,6 +3801,7 @@ newGame = function() {
   _musicPlaying = false;
   _origNewGame();
 };
+
 
 </script>
 
