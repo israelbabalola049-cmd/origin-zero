@@ -23,7 +23,6 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
 @keyframes slideUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 
 
-/* ── MUSIC SYSTEM ── */
 #yt-player{position:fixed;top:-9999px;left:-9999px;width:2px;height:2px;
   border:0;pointer-events:none;z-index:-1;overflow:hidden}
 .viz-wrap{display:flex;align-items:center;gap:6px;flex-shrink:0;overflow:hidden}
@@ -44,60 +43,72 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
   -webkit-tap-highlight-color:transparent}
 .mbtn:hover{color:var(--cyan)}
 
-/* ── TITLE SCREEN ── */
-#screen-title{
-  align-items:center;justify-content:center;
+
+
+/* ── TITLE ── */
+#screen-title{align-items:center;justify-content:center;
   background:
     radial-gradient(ellipse at 15% 55%,rgba(232,99,10,.13),transparent 52%),
     radial-gradient(ellipse at 88% 20%,rgba(0,201,177,.09),transparent 48%),
     radial-gradient(ellipse at 50% 110%,rgba(0,0,0,.5),transparent 55%),
     var(--bg);
   position:relative;overflow:hidden}
-#screen-title::before{
-  content:'';position:absolute;inset:0;
+#screen-title::before{content:'';position:absolute;inset:0;
   background:linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),
              linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);
   background-size:52px 52px;pointer-events:none;opacity:.7}
-#screen-title::after{
-  content:'';position:absolute;inset:0;
+#screen-title::after{content:'';position:absolute;inset:0;
   background:radial-gradient(ellipse at 50% 45%,transparent 35%,rgba(0,0,0,.45) 100%);
   pointer-events:none}
-.t-inner{
-  display:flex;flex-direction:column;align-items:center;
-  padding:clamp(40px,8vh,80px) 32px clamp(60px,10vh,100px);
-  width:100%;max-width:500px;box-sizing:border-box;
+.t-inner{display:flex;flex-direction:column;align-items:center;
+  padding:0 28px 60px;width:100%;max-width:500px;
   position:relative;z-index:1;justify-content:center;flex:1;gap:0}
-.t-eye{
-  font-family:var(--fm);font-size:10px;letter-spacing:.5em;color:var(--cyan);
-  text-transform:uppercase;margin-bottom:24px;
+.t-eye{font-family:var(--fm);font-size:10px;letter-spacing:.5em;color:var(--cyan);
+  text-transform:uppercase;margin-bottom:28px;
   opacity:0;animation:slideUp .9s cubic-bezier(.16,1,.3,1) .2s forwards}
-.t-logo{
-  font-family:var(--fd);font-size:clamp(76px,18vw,130px);color:var(--text);
-  letter-spacing:.04em;line-height:.85;text-align:center;
+.t-logo{font-family:var(--fd);font-size:clamp(76px,18vw,130px);color:var(--text);
+  letter-spacing:.04em;line-height:.82;text-align:center;
   text-shadow:0 0 80px rgba(232,99,10,.18),0 0 160px rgba(0,201,177,.07);
   opacity:0;animation:slideUp .95s cubic-bezier(.16,1,.3,1) .42s forwards}
 .t-logo span{color:var(--orange);display:block}
-.t-tag{
-  font-family:var(--fb);font-style:italic;font-size:clamp(14px,3.5vw,19px);
-  color:var(--dim);margin-top:20px;text-align:center;letter-spacing:.02em;
+.t-tag{font-family:var(--fb);font-style:italic;font-size:clamp(15px,3.8vw,20px);
+  color:var(--dim);margin-top:22px;text-align:center;letter-spacing:.02em;
   opacity:0;animation:slideUp .85s cubic-bezier(.16,1,.3,1) .7s forwards}
-.t-div{
-  width:80px;height:1px;
+.t-div{width:88px;height:1px;
   background:linear-gradient(90deg,transparent,var(--orange) 30%,var(--cyan) 70%,transparent);
-  margin:28px auto;
+  margin:34px auto;
   opacity:0;animation:slideUp .7s ease .95s forwards}
-.t-btns{
-  display:flex;flex-direction:column;gap:12px;width:100%;max-width:300px;
+.t-btns{display:flex;flex-direction:column;gap:14px;width:100%;max-width:310px;
   opacity:0;animation:slideUp .85s cubic-bezier(.16,1,.3,1) 1.08s forwards}
-.t-hint{
-  font-family:var(--fm);font-size:9px;color:var(--muted);letter-spacing:.1em;
+.t-hint{font-family:var(--fm);font-size:9px;color:var(--muted);letter-spacing:.1em;
   text-align:center;margin-top:12px;
   opacity:0;animation:slideUp .7s ease 1.28s forwards}
-.t-ver{
-  position:absolute;bottom:20px;left:50%;transform:translateX(-50%);
+.t-ver{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);
   font-family:var(--fm);font-size:9px;color:var(--muted);letter-spacing:.22em;
   white-space:nowrap;z-index:1;
   opacity:0;animation:slideUp .7s ease 1.45s forwards}
+
+/* ── MUSIC SYSTEM ── */
+#yt-player{position:fixed;top:-9999px;left:-9999px;width:2px;height:2px;
+  border:0;pointer-events:none;z-index:-1;overflow:hidden}
+.viz-wrap{display:flex;align-items:center;gap:6px;flex-shrink:0;overflow:hidden}
+.viz{display:flex;align-items:flex-end;gap:2px;height:14px;flex-shrink:0}
+.vb{width:3px;border-radius:2px;background:var(--cyan);min-height:3px;
+  opacity:.25;transition:opacity .4s ease;height:3px}
+.viz.on .vb{opacity:.85}
+.viz.on .vb:nth-child(1){animation:vb .52s ease-in-out infinite alternate}
+.viz.on .vb:nth-child(2){animation:vb .68s ease-in-out .12s infinite alternate}
+.viz.on .vb:nth-child(3){animation:vb .43s ease-in-out .04s infinite alternate}
+.viz.on .vb:nth-child(4){animation:vb .79s ease-in-out .18s infinite alternate}
+.viz.on .vb:nth-child(5){animation:vb .58s ease-in-out .09s infinite alternate}
+@keyframes vb{from{height:3px}to{height:13px}}
+.np{font-family:var(--fm);font-size:8px;color:var(--cyan);letter-spacing:.05em;
+  opacity:.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
+.mbtn{background:none;border:none;color:var(--muted);cursor:pointer;
+  padding:2px 5px;font-size:11px;line-height:1;flex-shrink:0;transition:color .2s;
+  -webkit-tap-highlight-color:transparent}
+.mbtn:hover{color:var(--cyan)}
+@media(max-width:480px){.np{display:none}.viz-wrap{gap:4px}}
 @media(max-width:480px){.np{display:none}.viz-wrap{gap:4px}}
 
 /* ── BUTTONS ── */
@@ -154,17 +165,17 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
 @media(max-width:640px){
   :root{--th:44px;--bh:56px}
 
-  /* title screen */
-  .t-inner{
-    padding:clamp(24px,5vh,44px) 20px clamp(44px,8vh,70px);
-    justify-content:space-evenly}
-  .t-eye{font-size:8px;letter-spacing:.3em;margin-bottom:10px}
-  .t-logo{font-size:clamp(64px,19vw,96px);line-height:.85}
-  .t-tag{font-size:clamp(12px,3.6vw,15px);margin-top:10px}
-  .t-div{width:56px;margin:16px auto}
-  .t-btns{gap:9px;max-width:100%}
-  .t-hint{font-size:8px;margin-top:6px}
-  .t-ver{font-size:7px;bottom:10px}
+  /* title — mobile */
+  .t-inner{padding:40px 20px 40px}
+  .t-logo{font-size:clamp(68px,19vw,110px)}
+  .t-eye{margin-bottom:16px}
+  .t-tag{font-size:clamp(13px,3.8vw,17px);margin-top:14px}
+  .t-div{margin:20px auto}
+  .t-btns{max-width:100%;gap:10px}
+  .t-hint{margin-top:8px}
+
+
+  /* title screen — mobile */
 
   /* game screen */
   .mss{display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border-bottom:1px solid var(--border)}
@@ -474,6 +485,7 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
 <div class="toast" id="toast"></div>
 
 <script>
+
 
 
 
@@ -3397,75 +3409,65 @@ setInterval(function(){
 
 var TRACKS = [
   /* ── Fixed order ── */
-  {src:'music/Cautious_Clay_-_Erase_(mp3.pm).mp3',                               title:'Cautious Clay \u2014 Erase',                         genre:'fifa'},
-  {src:'music/LieNJIHTfBHVuDW2kaVQtbeekYq7tB-TG-pUex92CTPtAhgdKDF5eDlJ-ZGEYz7W_0T9z-EIUlLisy3b99Jgx1OjfbX4k9TWZVeLvS9mdzgnTwQzOkznjjl0osIYlL8EWw62WgmzIMnuku-m4c1uX5b6qaTjhWzD9ZcmBnELCoZbWfgHVQ.mp3', title:'Ruin \u2014 Usher ft. Pheelz',               genre:'afrobeat'},
-  {src:'music/BJ_The_Chicago_Kid_feat._Anderson_.Paak_-_Feel_The_Vibe_(mp3.pm).mp3', title:'BJ the Chicago Kid \u2014 Feel The Vibe',         genre:'fifa'},
-  {src:'music/Tems-Free-Mind-(JustNaija.com).mp3',                                title:'Tems \u2014 Free Mind',                              genre:'afrobeat'},
-  {src:'music/WizKid-Ft-Tems-Essence.mp3',                                        title:'Wizkid ft Tems \u2014 Essence',                      genre:'afrobeat'},
-  {src:'music/Burna-Boy-Ye.mp3',                                                  title:'Burna Boy \u2014 Ye',                                genre:'afrobeat'},
-  {src:'music/Rema-Calm-Down-file-1-(JustNaija.com).mp3',                         title:'Rema \u2014 Calm Down',                              genre:'afrobeat'},
-  {src:'music/One Dance - Drake, Wizkid & Kyla.mp3',                              title:'One Dance \u2014 Drake ft. Wizkid & Kyla',           genre:'afrobeat'},
-  {src:'music/Nokia Drake (pagalall.com).mp3',                                    title:'Nokia \u2014 Drake',                                 genre:'pop'},
+  {src:'music/Cautious_Clay_-_Erase_(mp3.pm).mp3',                               title:'Cautious Clay \u2014 Erase',                    genre:'fifa'},
+  {src:'music/LieNJIHTfBHVuDW2kaVQtbeekYq7tB-TG-pUex92CTPtAhgdKDF5eDlJ-ZGEYz7W_0T9z-EIUlLisy3b99Jgx1OjfbX4k9TWZVeLvS9mdzgnTwQzOkznjjl0osIYlL8EWw62WgmzIMnuku-m4c1uX5b6qaTjhWzD9ZcmBnELCoZbWfgHVQ.mp3', title:'Ruin \u2014 Usher ft. Pheelz', genre:'afrobeat'},
+  {src:'music/BJ_The_Chicago_Kid_feat._Anderson_.Paak_-_Feel_The_Vibe_(mp3.pm).mp3', title:'BJ the Chicago Kid \u2014 Feel The Vibe', genre:'fifa'},
+  {src:'music/Tems-Free-Mind-(JustNaija.com).mp3',                                title:'Tems \u2014 Free Mind',                         genre:'afrobeat'},
+  {src:'music/WizKid-Ft-Tems-Essence.mp3',                                        title:'Wizkid ft Tems \u2014 Essence',                 genre:'afrobeat'},
+  {src:'music/Burna-Boy-Ye.mp3',                                                  title:'Burna Boy \u2014 Ye',                           genre:'afrobeat'},
+  {src:'music/Rema-Calm-Down-file-1-(JustNaija.com).mp3',                         title:'Rema \u2014 Calm Down',                         genre:'afrobeat'},
+  {src:'music/One Dance - Drake, Wizkid & Kyla.mp3',                              title:'One Dance \u2014 Drake ft. Wizkid & Kyla',      genre:'afrobeat'},
+  {src:'music/Nokia Drake (pagalall.com).mp3',                                    title:'Nokia \u2014 Drake',                            genre:'pop'},
   /* ── Randomized pool ── */
-  {src:'music/Kendrick Lamar - Humble.mp3',                                       title:'Kendrick Lamar \u2014 HUMBLE.',                      genre:'hiphop'},
-  {src:'music/Drake-Gods-Plan.mp3',                                               title:"Drake \u2014 God's Plan",                            genre:'hiphop'},
-  {src:'music/Drake-Gods-Plan (1).mp3',                                           title:"Drake \u2014 God's Plan (Alt)",                      genre:'hiphop'},
-  {src:'music/Travis Scott - SICKO MODE ft. Drake.mp3',                           title:'Travis Scott \u2014 SICKO MODE',                     genre:'hiphop'},
-  {src:'music/The Weeknd, Playboi Carti, Madonna - Popular (Official Audio).mp3', title:'Popular \u2014 The Weeknd',                          genre:'pop'},
-  {src:'music/Skepta_Joseph_Adenuga_-_Same_Old_Story_(mp3.pm).mp3',               title:'Skepta \u2014 Same Old Story',                       genre:'fifa'},
-  {src: 'Travis_Scott_JACKBOYS_-_Dumbo_(mp3.pm).mp3', title:' JACKBOYS \U2014 Dumbo', genre: 'hip-hop'},
+  {src:'music/Kendrick Lamar - Humble.mp3',                                       title:'Kendrick Lamar \u2014 HUMBLE.',                 genre:'hiphop'},
+  {src:'music/Drake-Gods-Plan.mp3',                                               title:"Drake \u2014 God's Plan",                       genre:'hiphop'},
+  {src:'music/Drake-Gods-Plan (1).mp3',                                           title:"Drake \u2014 God's Plan (Alt)",                 genre:'hiphop'},
+  {src:'music/Travis Scott - SICKO MODE ft. Drake.mp3',                           title:'Travis Scott \u2014 SICKO MODE',                genre:'hiphop'},
+  {src:'music/The Weeknd, Playboi Carti, Madonna - Popular (Official Audio).mp3', title:'Popular \u2014 The Weeknd',                     genre:'pop'},
+  {src:'music/Skepta_Joseph_Adenuga_-_Same_Old_Story_(mp3.pm).mp3',               title:'Skepta \u2014 Same Old Story',                  genre:'fifa'},
 ];
 
-var _FIXED_COUNT  = 9;       /* first 9 play in order */
-var _howl         = null;
-var _mOn          = false;
-var _mGo          = false;
-var _trackIdx     = 0;
-var _playedFixed  = false;
-var _skipCount    = 0;
-var _iosUnlocked  = false;
+var _FIXED_COUNT = 9;
+var _howl        = null;
+var _mOn         = false;
+var _mGo         = false;
+var _trackIdx    = 0;
+var _playedFixed = false;
+var _skipCount   = 0;
 
-/* ── iOS Safari AudioContext unlock ─────────────────────────────────────
-   iOS only allows audio after a touchend (NOT touchstart) or click.
-   We attach a one-time touchend listener to the whole document so that
-   Howler's internal AudioContext gets resumed the moment the user lifts
-   their finger — even before startMusic() is called.
-   This runs immediately on page load so it's always ready.             */
+/* Detect iOS Safari — needs html5:true to decode local MP3 files */
+var _isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+             (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+/* On iOS, unlock audio on first touchend so AudioContext is ready */
 (function(){
-  function _iosUnlock(){
-    _iosUnlocked = true;
-    /* Resume Howler's shared AudioContext if it exists */
+  function _unlock(){
     try{
-      var ctx = Howler.ctx || (window.Howler && Howler.ctx);
+      var ctx = Howler.ctx;
       if(ctx && ctx.state === 'suspended') ctx.resume();
     }catch(e){}
-    document.removeEventListener('touchend', _iosUnlock, false);
-    document.removeEventListener('click',    _iosUnlock, false);
+    document.removeEventListener('touchend', _unlock);
+    document.removeEventListener('click',    _unlock);
   }
-  document.addEventListener('touchend', _iosUnlock, false);
-  document.addEventListener('click',    _iosUnlock, false);
+  document.addEventListener('touchend', _unlock, {once:true, passive:true});
+  document.addEventListener('click',    _unlock, {once:true});
 })();
 
-/* Resume audio when app comes back from background (iOS Safari interrupts) */
+/* Resume when returning from background / tab switch */
 document.addEventListener('visibilitychange', function(){
-  if(!document.hidden && _mGo){
-    try{
-      var ctx = Howler.ctx || (window.Howler && Howler.ctx);
-      if(ctx && ctx.state === 'suspended') ctx.resume();
-    }catch(e){}
-    if(_howl && !_mOn){
-      try{ _howl.play(); }catch(e){}
-    }
+  if(document.hidden) return;
+  try{
+    var ctx = Howler.ctx;
+    if(ctx && ctx.state === 'suspended') ctx.resume();
+  }catch(e){}
+  if(_mGo && _howl && !_mOn){
+    try{ _howl.play(); }catch(e){}
   }
 });
 
 function _nextIdx(){
-  /* Play fixed sequence first */
-  if(!_playedFixed && _trackIdx < _FIXED_COUNT - 1){
-    return _trackIdx + 1;
-  }
+  if(!_playedFixed && _trackIdx < _FIXED_COUNT - 1) return _trackIdx + 1;
   _playedFixed = true;
-  /* Then pick by genre */
   var genre = _pickGenre();
   var pool = [];
   for(var i = 0; i < TRACKS.length; i++){
@@ -3474,8 +3476,7 @@ function _nextIdx(){
   if(!pool.length){
     for(var i = 0; i < TRACKS.length; i++) if(i !== _trackIdx) pool.push(i);
   }
-  if(!pool.length) return 0;
-  return pool[Math.floor(Math.random() * pool.length)];
+  return pool.length ? pool[Math.floor(Math.random() * pool.length)] : 0;
 }
 
 function _pickGenre(){
@@ -3495,7 +3496,7 @@ function _pickGenre(){
 }
 
 function _playIdx(idx){
-  /* Stop and unload previous track */
+  /* Stop and unload previous */
   if(_howl){
     try{ _howl.stop(); _howl.unload(); }catch(e){}
     _howl = null;
@@ -3504,13 +3505,34 @@ function _playIdx(idx){
   _trackIdx = idx;
   var track = TRACKS[idx];
   setSongTitle(track.title);
+  var playPending = false;
 
   _howl = new Howl({
-    src:      [track.src],
-    html5:    false,     /* Web Audio API — required for mobileAutoEnable on iOS */
-    volume:   0.55,
-    autoplay: false,
-    preload:  false,     /* Don't preload — Safari breaks if play() fires mid-load */
+    src:     [track.src],
+    /*
+     * html5:true  on iOS  — iOS Safari cannot decode Web Audio (AudioBuffer)
+     *                        for local files; it needs the HTML5 Audio element.
+     * html5:false on desktop — Web Audio API gives better autoplay behaviour
+     *                          on Chrome/Firefox/desktop Safari.
+     */
+    html5:   _isIOS ? true : false,
+    volume:  0.55,
+    preload: true,   /* preload:true so onload fires before we call play() */
+    format:  ['mp3'],
+
+    onload: function(){
+      /* File is fully ready — safe to play now */
+      if(_mGo && !playPending){
+        playPending = true;
+        /* Resume AudioContext inside onload (still counts as user-gesture chain) */
+        try{
+          var ctx = Howler.ctx;
+          if(ctx && ctx.state === 'suspended') ctx.resume();
+        }catch(e){}
+        _howl.play();
+      }
+    },
+
     onplay: function(){
       _mOn = true; _skipCount = 0;
       _vizActive(true); _mBtnSync();
@@ -3525,42 +3547,34 @@ function _playIdx(idx){
       _mOn = false;
       if(_mGo) _playIdx(_nextIdx());
     },
+
     onloaderror: function(id, err){
-      var t = TRACKS[_trackIdx];
+      _skipCount++;
       if(err === 4){
-        console.warn('[Music] File not found: ' + t.src);
+        /* File not found — skip silently */
         setSongTitle('');
-        _skipCount++;
-        /* Skip silently — try next track */
-        if(_mGo && _skipCount < TRACKS.length) _playIdx(_nextIdx());
       } else {
-        console.warn('[Music] Load error ' + err + ': ' + t.src);
-        _skipCount++;
-        if(_mGo && _skipCount < TRACKS.length) _playIdx(_nextIdx());
+        console.warn('[Music] Load error', err, TRACKS[_trackIdx].src);
       }
+      if(_mGo && _skipCount < TRACKS.length) _playIdx(_nextIdx());
     },
+
     onplayerror: function(id, err){
-      /* iOS AudioContext locked — wait for unlock then retry */
+      /* AudioContext still locked — Howler will unlock on next interaction */
       var self = this;
       self.once('unlock', function(){ self.play(); });
-      /* Also try resuming the context directly */
-      try{
-        var ctx = Howler.ctx;
-        if(ctx && ctx.state === 'suspended'){
-          ctx.resume().then(function(){ self.play(); });
-        }
-      }catch(e){}
     }
   });
-
-  _howl.play();
+  /* Note: we do NOT call _howl.play() here.
+     We call it inside onload so the file is guaranteed ready first.
+     This prevents the Safari race condition where play() fires mid-decode. */
 }
 
 function startMusic(){
   if(_mGo) return;
   _mGo = true;
   _playedFixed = false;
-  /* Resume AudioContext synchronously inside the user gesture */
+  /* Resume AudioContext synchronously — we are inside a user gesture right now */
   try{
     if(Howler.ctx && Howler.ctx.state === 'suspended') Howler.ctx.resume();
   }catch(e){}
@@ -3575,12 +3589,11 @@ function pauseMusic(){
 
 function resumeMusic(){
   if(!_mGo){ startMusic(); return; }
-  /* Resume AudioContext first */
   try{
     if(Howler.ctx && Howler.ctx.state === 'suspended') Howler.ctx.resume();
   }catch(e){}
-  if(_howl){ try{ _howl.play(); }catch(e){} }
-  else _playIdx(_trackIdx);
+  if(_howl && !_mOn){ try{ _howl.play(); }catch(e){} }
+  else if(!_howl) _playIdx(_trackIdx);
 }
 
 function toggleMusic(){
@@ -3601,13 +3614,15 @@ function _vizActive(on){
 }
 
 function _mBtnSync(){
-  var b = document.getElementById('mbtn') || document.getElementById('music-btn') || document.getElementById('music-toggle');
+  var b = document.getElementById('mbtn') || document.getElementById('music-toggle') || document.getElementById('music-btn');
   if(!b) return;
   b.innerHTML = _mOn ? '&#9646;&#9646;' : '&#9654;';
-  b.title     = _mOn ? 'Pause music' : 'Play music';
+  b.title = _mOn ? 'Pause music' : 'Play music';
 }
 
-/* Called directly from BEGIN YOUR LIFE button — inside user gesture */
+/* startMusicAndGame is called directly from the BEGIN YOUR LIFE button onclick.
+   Being inside the click handler means we are inside a user gesture —
+   both iOS and desktop browsers allow audio play() here. */
 function startMusicAndGame(){
   startMusic();
   startGame();
