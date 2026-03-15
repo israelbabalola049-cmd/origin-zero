@@ -527,6 +527,10 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
 
 
 
+
+
+
+
 /* === SECTION 1: CONSTANTS & DATA LIBRARIES === */
 
 // Country data: currency, region, exam system, salary factor (multiplier vs global baseline), tax style
@@ -3278,7 +3282,6 @@ function makeChoice(idx){
   if(!G._currentEvent)return;
   const ev=G._currentEvent;const ch=ev.choices[idx];if(!ch)return;
   applyOutcome(ch.outcome);
-  if(ch.outcome._setFlag)ch.outcome._setFlag(G);
   if(!G._fired.includes(ev.id))G._fired.push(ev.id);
   addLog(G.age,ev.title,ev.category);
 
@@ -3291,8 +3294,21 @@ function makeChoice(idx){
 
   if(_chainQueue.length>0){
     setTimeout(()=>{
-      const next=popChain();
-      if(next){G._currentEvent=next;G._awaiting=true;document.getElementById('btn-age').disabled=true;renderEvent(next);renderStats();}
+      try{
+        const next=popChain();
+        if(next&&next.choices&&next.choices.length){
+          G._currentEvent=next;G._awaiting=true;
+          document.getElementById('btn-age').disabled=true;
+          renderEvent(next);renderStats();
+        }else{
+          _chainQueue=[];G._awaiting=false;
+          const b=document.getElementById('btn-age');if(b)b.disabled=false;
+        }
+      }catch(err){
+        console.warn('Chain err',err);
+        _chainQueue=[];G._awaiting=false;
+        const b=document.getElementById('btn-age');if(b)b.disabled=false;
+      }
     },700);
   }
   save();
@@ -3386,426 +3402,314 @@ function toast(msg){
    Single hidden YouTube iframe. CSS-only visualizer.
    Uses var assignment so hooks never cause infinite recursion.
    ============================================================= */
-var MUSIC_LIB = {
-  afrobeat:[
-    {id:'lPe09eE6Xio', title:'Burna Boy \u2014 Ye'},
-    {id:'jipQpjUA_o8', title:'Wizkid ft Tems \u2014 Essence'},
-    {id:'eR3-bHHRKLU', title:'Rema \u2014 Calm Down'},
-    {id:'VwkPvSQA9cY', title:'Tems \u2014 Free Mind'},
-    {id:'PKoaM2e8I6c', title:'Davido \u2014 Fall'},
-    {id:'IrjAWNV_bio', title:'Omah Lay \u2014 Bad Influence'},
-    {id:'3YqWWYhDz3g', title:'Fireboy DML \u2014 Peru'},
-    {id:'sSWp_n14rNk', title:'Ayra Starr \u2014 Rush'},
-    {id:'ZAH5ZsCQ_Lc', title:'Asake \u2014 Joha'},
-    {id:'lYwlvZaFiI8', title:'Kizz Daniel \u2014 Buga'},
-  ],
-  hiphop:[
-    {id:'tvTRZJ-4EyI', title:'Kendrick Lamar \u2014 HUMBLE.'},
-    {id:'xpVfcZ0ZcFM', title:'Drake \u2014 God\'s Plan'},
-    {id:'6ONRf7h3Mdk', title:'Travis Scott \u2014 SICKO MODE'},
-    {id:'VMVMkpSeHYA', title:'J. Cole \u2014 Love Yourz'},
-    {id:'MKmLrKpQBYo', title:'Kanye West \u2014 Runaway'},
-    {id:'ZHwVBirqD2s', title:'Kendrick Lamar \u2014 Not Like Us'},
-  ],
-  pop:[
-    {id:'92cwKCU8Z5c', title:'Dua Lipa \u2014 Levitating'},
-    {id:'DyDfgMOUjCI', title:'Billie Eilish \u2014 bad guy'},
-    {id:'OPf0YbXqDm0', title:'The Weeknd \u2014 Blinding Lights'},
-    {id:'04854XqcfBg', title:'Harry Styles \u2014 As It Was'},
-    {id:'JGwWNGJdvx8', title:'Ed Sheeran \u2014 Shape of You'},
-  ],
-  rnb:[
-    {id:'Us3UHljOTFA', title:'SZA \u2014 Good Days'},
-    {id:'pXRviuL6vMY', title:'Frank Ocean \u2014 Chanel'},
-    {id:'F_56lxrr-3A', title:'Tems \u2014 Damage'},
-    {id:'lMQqiGf0vE0', title:'Jorja Smith \u2014 On My Mind'},
-    {id:'8BIhn4VFuDE', title:'Daniel Caesar \u2014 Get You'},
-  ],
-  fifa:[
-    {id:'ROHN61Q3KdQ', title:'Milky Chance \u2014 Fado'},
-    {id:'YQFk_1-43A4', title:'BJ the Chicago Kid \u2014 Feel the Vibe'},
-    {id:'G6C1VWp1Bcs', title:'Cautious Clay \u2014 Erase'},
-    {id:'BacFKGHCLYs', title:'Skepta \u2014 Same Old Story'},
-    {id:'_OBBaToQNxc', title:'Major Lazer \u2014 Que Calor'},
-    {id:'dX3k_QDnRwo', title:'Glass Animals \u2014 Heat Waves'},
-    {id:'d9IL73I4AxQ', title:'Tame Impala \u2014 Let It Happen'},
-  ],
-  chill:[
-    {id:'M-S9dR7z_KM', title:'Rex Orange County \u2014 Loving Is Easy'},
-    {id:'bCnFOBEfUds', title:'Mac Miller \u2014 Small Worlds'},
-    {id:'DpHSpgcMJBM', title:'Coldplay \u2014 Yellow'},
-    {id:'v7Ov4-YsMRs', title:'UNKLE \u2014 Lonely Soul'},
-  ],
+
+/* Watchdog: recover frozen game after 8s */
+setInterval(function(){
+  if(!G||!G._awaiting||G._currentEvent)return;
+  G._awaiting=false;
+  _chainQueue=[];
+  var b=document.getElementById('btn-age');
+  if(b)b.disabled=false;
+},8000);
+
+/* ================================================================
+   MUSIC ENGINE v7 — Web Audio API
+   No iframes. No third-party embeds. No permissions violations.
+   Generates ambient game music directly in the browser.
+   Works everywhere, starts instantly on user click.
+   ================================================================ */
+
+var _ac=null;          /* AudioContext */
+var _mGain=null;       /* master gain */
+var _mOn=false;
+var _mGo=false;
+var _mNodes=[];        /* active oscillator nodes to stop */
+var _mTimer=null;
+var _mMood='neutral';
+
+/* ── Scales ─────────────────────────────────────────────────── */
+var SCALES={
+  afrobeat:  [0,2,4,7,9,12,14,16],   /* major pentatonic + 2 */
+  hiphop:    [0,3,5,7,10,12,15,17],  /* minor pentatonic */
+  chill:     [0,2,3,7,9,12,14,15],   /* dorian */
+  sad:       [0,2,3,7,9,12,14,15],   /* natural minor */
+  happy:     [0,2,4,5,7,9,11,12],    /* major */
+  tense:     [0,1,3,6,7,8,10,12],    /* diminished-ish */
+  sports:    [0,2,4,7,9,12,14,16],   /* major pentatonic driving */
 };
 
-var _musicPlaying = false;
-var _musicStarted = false;
-var _currentGenre = 'afrobeat';
-var _trackTimer = null;
+var MOODS={
+  afrobeat: {scale:'afrobeat', baseNote:60, tempo:118, reverb:.3, brightness:.7},
+  hiphop:   {scale:'hiphop',  baseNote:58, tempo:88,  reverb:.4, brightness:.4},
+  chill:    {scale:'chill',   baseNote:57, tempo:72,  reverb:.6, brightness:.4},
+  sad:      {scale:'sad',     baseNote:56, tempo:65,  reverb:.7, brightness:.2},
+  happy:    {scale:'happy',   baseNote:62, tempo:105, reverb:.25,brightness:.8},
+  tense:    {scale:'tense',   baseNote:55, tempo:95,  reverb:.5, brightness:.3},
+  sports:   {scale:'sports',  baseNote:60, tempo:130, reverb:.2, brightness:.9},
+};
 
-function _pickGenre() {
-  if (!G) return 'afrobeat';
-  var cp = (G.career && G.career.path) || '';
-  var age = G.age || 0;
-  var happy = (G.stats && G.stats.happiness) || 50;
-  var country = G.country || '';
-  if (cp === 'football' || cp === 'basketball' || cp === 'athletics') return 'fifa';
-  if (cp === 'afrobeats') return 'afrobeat';
-  if (cp === 'hiphop') return 'hiphop';
-  if (cp === 'rnb') return 'rnb';
-  if (age < 13) return 'chill';
-  if (happy < 35) return Math.random() < 0.5 ? 'chill' : 'rnb';
-  if (country === 'Nigeria' || country === 'Ghana' || country === 'Senegal' ||
-      country === 'Kenya'   || country === 'Ethiopia') return 'afrobeat';
-  if (country === 'United States' || country === 'Canada')
-    return Math.random() < 0.5 ? 'hiphop' : 'pop';
-  if (country === 'United Kingdom')
-    return Math.random() < 0.5 ? 'pop' : 'rnb';
-  var pool = ['afrobeat','hiphop','pop','rnb','fifa','chill'];
-  return pool[Math.floor(Math.random() * pool.length)];
+var TRACK_NAMES={
+  afrobeat:'Afrobeat Groove',
+  hiphop:  'Hip-Hop Atmosphere',
+  chill:   'Chill Wave',
+  sad:     'Quiet Hours',
+  happy:   'Good Days',
+  tense:   'Rising Tension',
+  sports:  'Training Montage',
+};
+
+function _midiToHz(midi){
+  return 440*Math.pow(2,(midi-69)/12);
 }
 
-function playSong(videoId, title) {
-  var fr = document.getElementById('yt-player');
-  if (!fr) return;
-  /* Force iframe reload by removing src first, then setting new one */
-  fr.src = '';
-  fr.src = 'https://www.youtube.com/embed/' + videoId +
-    '?enablejsapi=1&autoplay=1&controls=0&modestbranding=1&rel=0&playsinline=1&fs=0&iv_load_policy=3&origin=' + encodeURIComponent(window.location.origin||'null');
-  setSongTitle(title);
-  _musicPlaying = true;
+function _pickMood(){
+  if(!G) return 'afrobeat';
+  var cp=(G.career&&G.career.path)||'';
+  var age=G.age||0;
+  var happy=(G.stats&&G.stats.happiness)||50;
+  var country=G.country||'';
+  if(cp==='football'||cp==='basketball'||cp==='athletics') return 'sports';
+  if(cp==='afrobeats') return 'afrobeat';
+  if(cp==='hiphop')    return 'hiphop';
+  if(happy<25)         return 'sad';
+  if(happy<45)         return 'chill';
+  if(happy>75)         return 'happy';
+  if(country==='Nigeria'||country==='Ghana'||country==='Senegal'||
+     country==='Kenya'||country==='Ethiopia') return 'afrobeat';
+  if(country==='United States'||country==='Canada') return 'hiphop';
+  return 'chill';
+}
+
+function _stopAll(){
+  _mNodes.forEach(function(n){
+    try{
+      if(n.stop) n.stop(0);
+      if(n.disconnect) n.disconnect();
+    }catch(e){}
+  });
+  _mNodes=[];
+  if(_mTimer){clearTimeout(_mTimer);_mTimer=null;}
+}
+
+function _makeReverb(ac, secs, decay){
+  var sr=ac.sampleRate;
+  var len=sr*secs;
+  var buf=ac.createBuffer(2,len,sr);
+  for(var c=0;c<2;c++){
+    var d=buf.getChannelData(c);
+    for(var i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,decay);
+  }
+  var conv=ac.createConvolver();
+  conv.buffer=buf;
+  return conv;
+}
+
+function _playMood(moodKey){
+  if(!_ac||!_mGain) return;
+  _stopAll();
+  _mMood=moodKey;
+
+  var mood=MOODS[moodKey]||MOODS.chill;
+  var scale=SCALES[mood.scale]||SCALES.chill;
+  var base=mood.baseNote;
+  var tempo=mood.tempo;
+  var beat=60/tempo;         /* seconds per beat */
+  var bright=mood.brightness;
+
+  setSongTitle(TRACK_NAMES[moodKey]||'Ambient');
+
+  /* Shared reverb */
+  var rev=_makeReverb(_ac, 2.5, 2);
+  var revGain=_ac.createGain();
+  revGain.gain.value=mood.reverb;
+  rev.connect(revGain);
+  revGain.connect(_mGain);
+
+  var dryGain=_ac.createGain();
+  dryGain.gain.value=1-mood.reverb;
+  dryGain.connect(_mGain);
+
+  /* Low-pass filter — controls brightness */
+  var filt=_ac.createBiquadFilter();
+  filt.type='lowpass';
+  filt.frequency.value=400+bright*6000;
+  filt.Q.value=1.2;
+  filt.connect(dryGain);
+  filt.connect(rev);
+
+  var now=_ac.currentTime+0.05;
+
+  /* ── Bass line ── */
+  var bassNotes=scale.filter(function(n){return n<12;});
+  var bassPattern=[0,0,4,7,0,0,7,4,0,0,3,7,0,0,5,7];
+  var bDur=beat*0.9;
+  for(var step=0;step<64;step++){
+    var patIdx=bassPattern[step%bassPattern.length];
+    var noteIdx=Math.floor(patIdx/12*bassNotes.length)%bassNotes.length;
+    var semitone=bassNotes[noteIdx]||0;
+    var freq=_midiToHz(base-24+semitone);
+    var t=now+step*beat;
+    var osc=_ac.createOscillator();
+    osc.type='sawtooth';
+    osc.frequency.value=freq;
+    var env=_ac.createGain();
+    env.gain.setValueAtTime(0,t);
+    env.gain.linearRampToValueAtTime(0.18,t+0.02);
+    env.gain.exponentialRampToValueAtTime(0.001,t+bDur);
+    osc.connect(env); env.connect(filt);
+    osc.start(t); osc.stop(t+bDur+0.05);
+    _mNodes.push(osc,env);
+  }
+
+  /* ── Chord pad ── */
+  var chords=[[0,4,7],[0,3,7],[5,9,12],[7,11,14]];
+  var chordDur=beat*4;
+  for(var ci=0;ci<16;ci++){
+    var chord=chords[ci%chords.length];
+    var ct=now+ci*chordDur;
+    chord.forEach(function(semi){
+      var freq=_midiToHz(base+semi);
+      var osc=_ac.createOscillator();
+      osc.type='sine';
+      osc.frequency.value=freq;
+      var env=_ac.createGain();
+      env.gain.setValueAtTime(0,ct);
+      env.gain.linearRampToValueAtTime(0.08,ct+0.3);
+      env.gain.setValueAtTime(0.08,ct+chordDur-0.4);
+      env.gain.linearRampToValueAtTime(0,ct+chordDur);
+      osc.connect(env); env.connect(filt);
+      osc.start(ct); osc.stop(ct+chordDur+0.05);
+      _mNodes.push(osc,env);
+    });
+  }
+
+  /* ── Melody ── */
+  var melPat=[0,2,4,7,4,2,0,3,5,7,9,7,5,3,2,0];
+  var melDur=beat*0.45;
+  for(var mi=0;mi<48;mi++){
+    if(Math.random()<0.35) continue; /* natural gaps */
+    var semi=scale[melPat[mi%melPat.length]%scale.length];
+    var oct=(mi%16<8)?12:0;
+    var freq=_midiToHz(base+semi+oct);
+    var mt=now+(mi*beat*0.5);
+    var osc=_ac.createOscillator();
+    osc.type=bright>0.6?'triangle':'sine';
+    osc.frequency.value=freq;
+    var env=_ac.createGain();
+    env.gain.setValueAtTime(0,mt);
+    env.gain.linearRampToValueAtTime(0.06,mt+0.03);
+    env.gain.exponentialRampToValueAtTime(0.001,mt+melDur);
+    osc.connect(env); env.connect(filt);
+    osc.start(mt); osc.stop(mt+melDur+0.05);
+    _mNodes.push(osc,env);
+  }
+
+  /* ── Hi-hat / percussion (noise bursts) ── */
+  for(var hi=0;hi<64;hi++){
+    if(Math.random()<0.4) continue;
+    var ht=now+hi*(beat*0.5);
+    var buf=_ac.createBuffer(1,_ac.sampleRate*0.05,_ac.sampleRate);
+    var data=buf.getChannelData(0);
+    for(var si=0;si<data.length;si++) data[si]=Math.random()*2-1;
+    var src=_ac.createBufferSource();
+    src.buffer=buf;
+    var hf=_ac.createBiquadFilter();
+    hf.type='highpass';
+    hf.frequency.value=8000;
+    var hg=_ac.createGain();
+    hg.gain.setValueAtTime(0,ht);
+    hg.gain.linearRampToValueAtTime(0.04,ht+0.003);
+    hg.gain.exponentialRampToValueAtTime(0.001,ht+0.04);
+    src.connect(hf); hf.connect(hg); hg.connect(dryGain);
+    src.start(ht); src.stop(ht+0.05);
+    _mNodes.push(src,hg);
+  }
+
+  /* Schedule next generation before this one ends */
+  var totalDur=64*beat+2;
+  _mTimer=setTimeout(function(){
+    if(_mOn&&_mGo) _playMood(_pickMood());
+  }, (totalDur-4)*1000);
+
+  _mOn=true;
   _vizActive(true);
-  _musicBtnUpdate();
-  _resetTrackTimer();
+  _mBtnSync();
 }
 
-function pauseMusic() {
-  var fr = document.getElementById('yt-player');
-  if (fr) fr.src = 'about:blank';
-  _musicPlaying = false;
-  _vizActive(false);
-  _musicBtnUpdate();
-  if (_trackTimer) clearTimeout(_trackTimer);
+/* ── Public API ─────────────────────────────────────────────── */
+function startMusic(){
+  _mGo=true;
+  if(!_ac){
+    try{
+      _ac=new(window.AudioContext||window.webkitAudioContext)();
+    }catch(e){
+      console.warn('Web Audio not supported');return;
+    }
+    _mGain=_ac.createGain();
+    _mGain.gain.value=0.55;
+    _mGain.connect(_ac.destination);
+  }
+  if(_ac.state==='suspended') _ac.resume();
+  _playMood(_pickMood());
 }
 
-function resumeMusic() {
-  if (!_musicStarted) { startMusic(); return; }
-  var genre = _pickGenre();
-  var list = MUSIC_LIB[genre] || MUSIC_LIB.afrobeat;
-  var song = list[Math.floor(Math.random() * list.length)];
-  playSong(song.id, song.title);
+function pauseMusic(){
+  _mOn=false;_mGo=false;
+  _stopAll();
+  if(_ac&&_ac.state==='running') _ac.suspend();
+  _vizActive(false);_mBtnSync();
 }
 
-function setSongTitle(title) {
-  /* supports both id="np-text" and id="now-playing" */
-  var el = document.getElementById('np-text') || document.getElementById('now-playing');
-  if (el) el.textContent = title || '';
+function resumeMusic(){
+  if(!_mGo){startMusic();return;}
+  if(_ac&&_ac.state==='suspended') _ac.resume();
+  _mGo=true;_mOn=true;
+  _playMood(_mMood);
+  _vizActive(true);_mBtnSync();
 }
 
-function _vizActive(on) {
-  var v = document.getElementById('viz');
-  if (!v) return;
-  if (on) { v.classList.add('on'); v.classList.add('playing'); }
-  else    { v.classList.remove('on'); v.classList.remove('playing'); }
+function advanceTrack(){
+  if(_mGo) _playMood(_pickMood());
 }
 
-function _musicBtnUpdate() {
-  /* supports multiple possible button IDs */
-  var b = document.getElementById('mbtn') ||
-          document.getElementById('music-btn') ||
-          document.getElementById('music-toggle');
-  if (!b) return;
-  b.innerHTML = _musicPlaying ? '&#9646;&#9646;' : '&#9654;';
-  b.title     = _musicPlaying ? 'Pause music' : 'Play music';
-}
-
-function _resetTrackTimer() {
-  if (_trackTimer) clearTimeout(_trackTimer);
-  _trackTimer = setTimeout(function() {
-    if (_musicPlaying) advanceTrack();
-  }, 255000); /* ~4.25 minutes */
-}
-
-function advanceTrack() {
-  _currentGenre = _pickGenre();
-  var list = MUSIC_LIB[_currentGenre] || MUSIC_LIB.afrobeat;
-  var song = list[Math.floor(Math.random() * list.length)];
-  playSong(song.id, song.title);
-}
-
-function startMusic() {
-  _musicStarted = true;
-  advanceTrack();
-}
-
-function toggleMusic() {
-  if (!_musicStarted) { startMusic(); return; }
-  if (_musicPlaying) pauseMusic();
+function toggleMusic(){
+  if(!_mGo)startMusic();
+  else if(_mOn)pauseMusic();
   else resumeMusic();
 }
 
-/* =============================================================
-   GAME FIXES  (all use var assignment — no function hoisting)
-   ============================================================= */
-
-/* ── GIVE UP ─────────────────────────────────────────────── */
-function giveUp() {
-  if (!G) return;
-  showModal('End This Life?',
-    '<div style="font-size:13px;color:var(--dim);font-style:italic;margin-bottom:18px;line-height:1.8">' +
-    '"' + G.name + '" \u2014 Age ' + G.age + '.<br>' +
-    'Everything ends. Even the lives we choose to walk away from.' +
-    '</div>' +
-    '<div style="display:flex;flex-direction:column;gap:10px">' +
-    '<button class="btn btn-s" style="color:var(--danger);border-color:rgba(232,64,64,.5)" onclick="confirmGiveUp()">Yes, end this life</button>' +
-    '<button class="btn btn-s" onclick="closeModal()">No, keep going</button>' +
-    '</div>');
+function setSongTitle(t){
+  var el=document.getElementById('np-text')||document.getElementById('now-playing');
+  if(el) el.textContent=t||'';
 }
 
-function confirmGiveUp() {
-  closeModal();
-  G._causeOfDeath = 'Chose to walk away';
-  G._deathYear = G.world.year;
-  save();
-  pauseMusic();
-  setTimeout(function() { renderDeath(); }, 350);
+function _vizActive(on){
+  var v=document.getElementById('viz');
+  if(!v)return;
+  if(on){v.classList.add('on');v.classList.add('playing');}
+  else{v.classList.remove('on');v.classList.remove('playing');}
 }
 
-/* ── DEBT CRISIS ─────────────────────────────────────────── */
-/* Extend checkThresholds via var assignment — zero hoisting risk */
-var _origCheckThresholds = checkThresholds;
-checkThresholds = function() {
-  if (!G) return true;
-  if (G.finances.cash < -30000 && !G.flags._debtCrisisHandled) {
-    G.flags._debtCrisisHandled = true;
-    handleDebtCrisis();
-    return false;
-  }
-  return _origCheckThresholds();
-};
-
-function handleDebtCrisis() {
-  var ev = {
-    id: '_debt_crisis_ev',
-    title: 'Financially Underwater',
-    narrative: 'The debt has compounded beyond anything you can service. Creditors are calling. The numbers do not work. Something has to give.',
-    category: 'general',
-    choices: [
-      { text: 'Sell everything. Start over.', condition: null, outcome: {
-        narrative: 'You liquidate. The car goes. The watches go. The savings evaporate. The debt shrinks. You are back to zero but breathing.',
-        stats: {happiness:-20, health:-5}, hidden: {stress:-15, karma:5},
-        flags: {bankrupt:true, sold_everything:true}, finances: {},
-        npcEffects: [], triggerEvent: null, achievement: null,
-        _setFlag: function(s) {
-          s.assets.car = null; s.assets.watches = [];
-          var av = s.assets.properties.reduce(function(t,p){ return t + (p.value||0); }, 0) * 0.7;
-          s.assets.properties = [];
-          s.finances.cash += av;
-          s.finances.debt = Math.max(0, s.finances.debt - av - 20000);
-          recalcNetWorth();
-        }
-      }},
-      { text: 'Declare bankruptcy.', condition: null, outcome: {
-        narrative: 'You file. The process is humiliating. The court freezes your debts. A fresh start that costs everything you built.',
-        stats: {happiness:-25}, hidden: {stress:-10, karma:-3, reputation:-15},
-        flags: {bankrupt:true, declared_bankruptcy:true}, finances: {},
-        npcEffects: [], triggerEvent: null, achievement: null,
-        _setFlag: function(s) {
-          s.finances.debt = 0;
-          s.finances.cash = Math.max(0, s.finances.cash);
-          s.assets.properties = []; s.assets.car = null;
-          recalcNetWorth();
-        }
-      }},
-      { text: 'Community service agreement.', condition: null, outcome: {
-        narrative: 'You negotiate with creditors. Community service in lieu of immediate payment. Unglamorous. The only option.',
-        stats: {happiness:-15}, hidden: {stress:5, karma:10},
-        flags: {community_service:true}, finances: {annualIncome:-5000},
-        npcEffects: [], triggerEvent: null, achievement: null
-      }},
-    ]
-  };
-  G._currentEvent = ev;
-  G._awaiting = true;
-  var btn = document.getElementById('btn-age');
-  if (btn) btn.disabled = true;
-  renderEvent(ev);
-  renderStats();
-  save();
+function _mBtnSync(){
+  var b=document.getElementById('mbtn')||document.getElementById('music-btn')||document.getElementById('music-toggle');
+  if(!b)return;
+  b.innerHTML=_mOn?'&#9646;&#9646;':'&#9654;';
+  b.title=_mOn?'Pause':'Play';
 }
 
-/* ── POST-SECONDARY CAREER CHOICE ───────────────────────── */
-/* Hook ageUp via var assignment — captures the CURRENT ageUp before this line executes */
-var _origAgeUp = ageUp;
-ageUp = function() {
-  /* Intercept at 16-18 if secondary and no career decision yet */
-  if (G && G.age >= 16 && G.age <= 18 &&
-      G.education.stage === 'secondary' &&
-      !G.flags.post_secondary_decided &&
-      !G._awaiting) {
-    G.flags.post_secondary_decided = true; /* mark immediately to prevent re-trigger */
-    showPostSecondaryModal();
-    return;
-  }
-  /* Normal age-up */
-  _origAgeUp();
-  /* Advance music every 5 years */
-  if (_musicStarted && G && G.age % 5 === 0) advanceTrack();
-};
-
-function showPostSecondaryModal() {
-  showModal('What Comes Next?',
-    '<div style="font-size:13px;color:var(--dim);font-style:italic;margin-bottom:18px;line-height:1.8">' +
-    'Secondary school is ending. What are you going to do? This choice shapes the next decade.' +
-    '</div>' +
-    '<div style="display:flex;flex-direction:column;gap:9px">' +
-    '<button class="btn btn-s" onclick="choosePostSecondary(\'uni\')">&#127891; University / College</button>' +
-    '<button class="btn btn-s" onclick="choosePostSecondary(\'sports\')">&#9917; Pursue Sports</button>' +
-    '<button class="btn btn-s" onclick="choosePostSecondary(\'music\')">&#127926; Pursue Music</button>' +
-    '<button class="btn btn-s" onclick="choosePostSecondary(\'work\')">&#128188; Get a Job</button>' +
-    '<button class="btn btn-s" onclick="choosePostSecondary(\'gap\')">Gap Year</button>' +
-    '<button class="btn btn-s" onclick="choosePostSecondary(\'hustle\')">&#127962; Start Something</button>' +
-    '</div>');
-}
-
-function choosePostSecondary(choice) {
-  closeModal();
-  G.flags.post_secondary_decided = true;
-  if (choice === 'uni') {
-    G.flags.going_university = true; G.flags.started_university = true;
-    G.education.stage = 'university'; G.education.currentYear = 0; G.education.gpa = 2.5;
-    G.finances.debt += 15000;
-    addLog(G.age, 'Started university.', 'school');
-    toast('University started! Study hard.');
-  } else if (choice === 'sports') {
-    showModal('Choose Sport',
-      '<div style="display:flex;flex-direction:column;gap:9px">' +
-      '<button class="btn btn-s" onclick="startSportPath2(\'football\')">&#9917; Football</button>' +
-      '<button class="btn btn-s" onclick="startSportPath2(\'basketball\')">&#127936; Basketball</button>' +
-      '<button class="btn btn-s" onclick="startSportPath2(\'athletics\')">&#127939; Athletics</button>' +
-      '</div>');
-    return;
-  } else if (choice === 'music') {
-    showModal('Choose Sound',
-      '<div style="display:flex;flex-direction:column;gap:9px">' +
-      '<button class="btn btn-s" onclick="startMusicPath2(\'afrobeats\')">&#127926; Afrobeats</button>' +
-      '<button class="btn btn-s" onclick="startMusicPath2(\'hiphop\')">&#127908; Hip-Hop</button>' +
-      '<button class="btn btn-s" onclick="startMusicPath2(\'rnb\')">R&amp;B / Pop</button>' +
-      '</div>');
-    return;
-  } else if (choice === 'work') {
-    G.flags.going_work = true; G.flags.first_job = true;
-    var sal = Math.round(8000 * ((COUNTRIES[G.country] && COUNTRIES[G.country].salaryFactor) || 0.5));
-    G.career.salary = sal; G.career.title = 'Entry Level';
-    G.career.level = 1; G.career.path = 'corporate';
-    G.finances.annualIncome = sal;
-    addLog(G.age, 'Started work after school.', 'career');
-    toast('Working life begins. Build from here.');
-  } else if (choice === 'gap') {
-    G.flags.gap_year = true;
-    applyStats({happiness:12}); applyHidden({stress:-10});
-    addLog(G.age, 'Taking a gap year.', 'general');
-    toast('Gap year. No rush.');
-  } else if (choice === 'hustle') {
-    G.flags.career_path_started = true; G.flags.started_business = true;
-    enterCareerPath('entrepreneur', 1); G.finances.debt += 5000; recalcNetWorth();
-    addLog(G.age, 'Started building something.', 'career');
-    toast('The hustle begins.');
-  }
-  renderStats(); save();
-}
-
-function startSportPath2(p) {
-  closeModal();
-  G.flags.going_work = true; G.flags.career_path_started = true; G.flags.early_athlete = true;
-  enterCareerPath(p, 1);
-  addLog(G.age, 'Pursuing ' + CAREER_PATHS[p].label + ' career.', 'career');
-  renderStats(); save();
-  toast(CAREER_PATHS[p].label + ' path started!');
-  if (_musicStarted) advanceTrack();
-}
-
-function startMusicPath2(p) {
-  closeModal();
-  G.flags.going_work = true; G.flags.career_path_started = true; G.flags.childhood_music = true;
-  enterCareerPath(p, 1);
-  addLog(G.age, 'Started music: ' + CAREER_PATHS[p].label + '.', 'career');
-  renderStats(); save();
-  toast(CAREER_PATHS[p].label + ' path started!');
-  if (_musicStarted) advanceTrack();
-}
-
-/* ── SHOP FIX — all icons via HTML entity codes ─────────── */
-function getShopItems(cat) {
-  if (cat === 'car') return [
-    {name:'Old Banger',          icon:'&#128663;', price:800},
-    {name:'Used Toyota',         icon:'&#128663;', price:7000},
-    {name:'VW Golf',             icon:'&#128665;', price:18000},
-    {name:'BMW 3 Series',        icon:'&#127950;', price:42000},
-    {name:'Mercedes C-Class',    icon:'&#127950;', price:52000},
-    {name:'Porsche 911',         icon:'&#127950;', price:90000},
-    {name:'Range Rover',         icon:'&#128667;', price:98000},
-    {name:'Ferrari 488',         icon:'&#127950;', price:285000},
-    {name:'Lamborghini Urus',    icon:'&#127950;', price:360000},
-    {name:'Rolls Royce Phantom', icon:'&#128664;', price:820000},
-  ];
-  if (cat === 'watch') return [
-    {name:'Casio Digital',       icon:'&#8987;', price:40},
-    {name:'Seiko Presage',       icon:'&#8987;', price:350},
-    {name:'Tudor Black Bay',     icon:'&#8987;', price:3500},
-    {name:'Rolex Submariner',    icon:'&#8987;', price:14000},
-    {name:'Patek Philippe',      icon:'&#8987;', price:45000},
-    {name:'Richard Mille',       icon:'&#8987;', price:185000},
-  ];
-  if (cat === 'phone') return [
-    {name:'Basic Phone',         icon:'&#128242;', price:80},
-    {name:'Mid-Range Android',   icon:'&#128242;', price:350},
-    {name:'iPhone 14',           icon:'&#128242;', price:999},
-    {name:'iPhone Pro Max',      icon:'&#128242;', price:1299},
-    {name:'Samsung Ultra',       icon:'&#128242;', price:1199},
-    {name:'Samsung Fold',        icon:'&#128242;', price:1600},
-  ];
-  if (cat === 'property') return [
-    {name:'1-Bed Flat',          icon:'&#127968;', price:180000},
-    {name:'2-Bed House',         icon:'&#127969;', price:280000},
-    {name:'Family Home',         icon:'&#127968;', price:500000},
-    {name:'Penthouse',           icon:'&#127970;', price:1200000},
-    {name:'Mansion',             icon:'&#127963;', price:3000000},
-    {name:'Estate',              icon:'&#127963;', price:10000000},
-  ];
-  if (cat === 'clothes') return [
-    {name:'High Street Haul',    icon:'&#128084;', price:150},
-    {name:'Zara / H&M Fit',     icon:'&#128083;', price:300},
-    {name:'Nike / Adidas',       icon:'&#128094;', price:500},
-    {name:'Ralph Lauren',        icon:'&#129509;', price:1200},
-    {name:'Gucci Outfit',        icon:'&#128084;', price:3500},
-    {name:'Full Balenciaga',     icon:'&#129509;', price:8000},
-    {name:'Bespoke Suit',        icon:'&#129504;', price:5000},
-    {name:'Couture Piece',       icon:'&#10024;',  price:15000},
-  ];
-  return [];
-}
-
-/* ── HOOK startGame and newGame ─────────────────────────── */
-/* startMusicAndGame: called directly from button — synchronous user gesture
-   means the browser will allow YouTube autoplay */
-function startMusicAndGame() {
+function startMusicAndGame(){
   startMusic();
   startGame();
 }
 
-var _origNewGame = newGame;
-newGame = function() {
+var _origNewGame=newGame;
+newGame=function(){
   pauseMusic();
-  _musicStarted = false;
-  _musicPlaying = false;
   _origNewGame();
 };
 
-
 </script>
 
-<!-- YouTube audio -->
-<iframe id="yt-player" src="about:blank" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+<!-- YouTube audio --></iframe>
 </body>
 </html>
