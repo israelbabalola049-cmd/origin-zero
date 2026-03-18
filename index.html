@@ -3494,38 +3494,31 @@ setInterval(function(){
    Missing files are silently skipped — only need a few to work.
    ================================================================ */
 
-var _IS_GITHUB = window.location.hostname === 'israelbabalola049-cmd.github.io';
-var _GH_BASE   = 'https://israelbabalola049-cmd.github.io/origin-zero/';
-var _LOC_BASE  = 'music/';
-
-/* gh: filename on GitHub (root of repo)
-   loc: filename in local music/ folder */
-var TRACK_DEFS = [
-  /* ── Fixed order: plays first, in sequence ── */
-  {gh:'Cautious_Clay_-_Erase.mp3',                                              loc:'Cautious_Clay_-_Erase_(mp3.pm).mp3',                               title:'Cautious Clay — Erase',              genre:'fifa'},
-  {gh:'feel_the_vibe_bjthechicagokid.mp3',                                      loc:'BJ_The_Chicago_Kid_feat._Anderson_Paak_-_Feel_The_Vibe_(mp3.pm).mp3',title:'BJ Chicago Kid — Feel The Vibe',    genre:'fifa'},
-  {gh:'Tems-Free-Mind-(JustNaija.com).mp3',                                     loc:'Tems-Free-Mind-(JustNaija.com).mp3',                                title:'Tems — Free Mind',                   genre:'afrobeat'},
-  {gh:'WizKid-Ft-Tems-Essence.mp3',                                             loc:'WizKid-Ft-Tems-Essence.mp3',                                       title:'Wizkid ft Tems — Essence',            genre:'afrobeat'},
-  {gh:'Burna-Boy-Ye.mp3',                                                       loc:'Burna-Boy-Ye.mp3',                                                 title:'Burna Boy — Ye',                      genre:'afrobeat'},
-  {gh:'Rema-Calm-Down-file-1-(JustNaija.com).mp3',                              loc:'Rema-Calm-Down-file-1-(JustNaija.com).mp3',                         title:'Rema — Calm Down',                   genre:'afrobeat'},
-  {gh:'493.Drake、Wizkid、Kyla - One Dance.mp3',                        loc:'493.Drake、Wizkid、Kyla - One Dance.mp3',                   title:'One Dance — Drake, Wizkid & Kyla',   genre:'afrobeat'},
-  {gh:'Nokia Drake (pagalall.com).mp3',                                         loc:'Nokia Drake (pagalall.com).mp3',                                   title:'Nokia — Drake',                      genre:'pop'},
-  {gh:'ruin-usher.mp3',                                                         loc:'ruin-usher.mp3',                                                   title:'Ruin — Usher ft. Pheelz',            genre:'afrobeat'},
-  /* ── Pool: shuffled by genre after fixed order ── */
-  {gh:'Kendrick Lamar - Humble.mp3',                                            loc:'Kendrick Lamar - Humble.mp3',                                      title:'Kendrick Lamar — HUMBLE.',            genre:'hiphop'},
-  {gh:'Drake-Gods-Plan (1).mp3',                                                loc:'Drake-Gods-Plan (1).mp3',                                          title:"Drake — God's Plan",                 genre:'hiphop'},
-  {gh:'Travis Scott - SICKO MODE ft. Drake.mp3',                                loc:'Travis Scott - SICKO MODE ft. Drake.mp3',                          title:'Travis Scott — SICKO MODE',           genre:'hiphop'},
-  {gh:'JACKBOYS_-_Dumbo.mp3',                                                   loc:'Travis_Scott_JACKBOYS_-_Dumbo_(mp3.pm).mp3',                        title:'Travis Scott — Dumbo',                genre:'hiphop'},
-  {gh:'The Weeknd, Playboi Carti, Madonna - Popular.mp3',                       loc:'The Weeknd, Playboi Carti, Madonna - Popular (Official Audio).mp3', title:'Popular — The Weeknd',               genre:'pop'},
-  {gh:'Skepta_-_Same_Old_Story.mp3',                                            loc:'Skepta_Joseph_Adenuga_-_Same_Old_Story_(mp3.pm).mp3',               title:'Skepta — Same Old Story',             genre:'fifa'},
+var TRACKS = [
+  /* First 9 play in fixed order, then genre-shuffle */
+  {gh:'https://israelbabalola049-cmd.github.io/origin-zero/Cautious_Clay_-_Erase.mp3',loc:['music/Cautious_Clay_-_Erase_%28mp3.pm%29.mp3','music/Cautious_Clay_-_Erase.mp3'],title:'Cautious Clay — Erase',genre:'fifa'},
+  {gh:'https://israelbabalola049-cmd.github.io/origin-zero/feel_the_vibe_bjthechicagokid.mp3',loc:['music/BJ_The_Chicago_Kid_feat._Anderson_Paak_-_Feel_The_Vibe_%28mp3.pm%29.mp3','music/feel_the_vibe_bjthechicagokid.mp3'],title:'BJ Chicago Kid — Feel The Vibe',genre:'fifa'},
+  {gh:'https://israelbabalola049-cmd.github.io/origin-zero/Tems-Free-Mind-%28JustNaija.com%29.mp3',loc:['music/Tems-Free-Mind-%28JustNaija.com%29.mp3'],title:'Tems — Free Mind',genre:'afrobeat'},
+  {gh:'https://israelbabalola049-cmd.github.io/origin-zero/WizKid-Ft-Tems-Essence.mp3',loc:['music/WizKid-Ft-Tems-Essence.mp3'],title:'Wizkid ft Tems — Essence',genre:'afrobeat'},
+  {gh:'https://israelbabalola049-cmd.github.io/origin-zero/Burna-Boy-Ye.mp3',loc:['music/Burna-Boy-Ye.mp3'],title:'Burna Boy — Ye',genre:'afrobeat'},
+  {gh:'https://israelbabalola049-cmd.github.io/origin-zero/Rema-Calm-Down-file-1-%28JustNaija.com%29.mp3',loc:['music/Rema-Calm-Down-file-1-%28JustNaija.com%29.mp3'],title:'Rema — Calm Down',genre:'afrobeat'},
+  {gh:'https://israelbabalola049-cmd.github.io/origin-zero/493.Drake%E3%80%81Wizkid%E3%80%81Kyla%20-%20One%20Dance.mp3',loc:['music/493.Drake%E3%80%81Wizkid%E3%80%81Kyla%20-%20One%20Dance.mp3'],title:'One Dance — Drake, Wizkid & Kyla',genre:'afrobeat'},
+  {gh:'https://israelbabalola049-cmd.github.io/origin-zero/Nokia%20Drake%20%28pagalall.com%29.mp3',loc:['music/Nokia%20Drake%20%28pagalall.com%29.mp3'],title:'Nokia — Drake',genre:'pop'},
+  {gh:'https://israelbabalola049-cmd.github.io/origin-zero/ruin-usher.mp3',loc:['music/ruin-usher.mp3'],title:'Ruin — Usher ft. Pheelz',genre:'afrobeat'},
+  /* ── Pool ── */
+  {gh:'https://israelbabalola049-cmd.github.io/origin-zero/Kendrick%20Lamar%20-%20Humble.mp3',loc:['music/Kendrick%20Lamar%20-%20Humble.mp3'],title:'Kendrick Lamar — HUMBLE.',genre:'hiphop'},
+  {gh:'https://israelbabalola049-cmd.github.io/origin-zero/Drake-Gods-Plan%20%281%29.mp3',loc:['music/Drake-Gods-Plan%20%281%29.mp3'],title:'Drake — God\'s Plan',genre:'hiphop'},
+  {gh:'https://israelbabalola049-cmd.github.io/origin-zero/Travis%20Scott%20-%20SICKO%20MODE%20ft.%20Drake.mp3',loc:['music/Travis%20Scott%20-%20SICKO%20MODE%20ft.%20Drake.mp3'],title:'Travis Scott — SICKO MODE',genre:'hiphop'},
+  {gh:'https://israelbabalola049-cmd.github.io/origin-zero/JACKBOYS_-_Dumbo.mp3',loc:['music/Travis_Scott_JACKBOYS_-_Dumbo_%28mp3.pm%29.mp3','music/JACKBOYS_-_Dumbo.mp3'],title:'Travis Scott — Dumbo',genre:'hiphop'},
+  {gh:'https://israelbabalola049-cmd.github.io/origin-zero/The%20Weeknd%2C%20Playboi%20Carti%2C%20Madonna%20-%20Popular.mp3',loc:['music/The%20Weeknd%2C%20Playboi%20Carti%2C%20Madonna%20-%20Popular%20%28Official%20Audio%29.mp3','music/The%20Weeknd%2C%20Playboi%20Carti%2C%20Madonna%20-%20Popular.mp3'],title:'Popular — The Weeknd',genre:'pop'},
+  {gh:'https://israelbabalola049-cmd.github.io/origin-zero/Skepta_-_Same_Old_Story.mp3',loc:['music/Skepta_Joseph_Adenuga_-_Same_Old_Story_%28mp3.pm%29.mp3','music/Skepta_-_Same_Old_Story.mp3'],title:'Skepta — Same Old Story',genre:'fifa'},
 ];
 
-/* Build TRACKS array using correct base path for current environment */
-var TRACKS = TRACK_DEFS.map(function(d){
-  var base = _IS_GITHUB ? _GH_BASE : _LOC_BASE;
-  return {src: base + d[_IS_GITHUB ? 'gh' : 'loc'], title: d.title, genre: d.genre};
+var _IS_GITHUB = window.location.hostname === 'israelbabalola049-cmd.github.io';
+/* Pick the right src for this environment */
+var TRACK_LIST = TRACKS.map(function(t){
+  return {src: _IS_GITHUB ? t.gh : t.loc, title: t.title, genre: t.genre};
 });
-
 
 var _FIXED_COUNT = 9;   /* first 9 tracks play in order */
 var _howl        = null;
@@ -3567,11 +3560,11 @@ function _nextIdx(){
   _playedFixed = true;
   var genre = _pickGenre();
   var pool = [];
-  for(var i = 0; i < TRACKS.length; i++){
-    if(TRACKS[i].genre === genre && i !== _trackIdx) pool.push(i);
+  for(var i = 0; i < TRACK_LIST.length; i++){
+    if(TRACK_LIST[i].genre === genre && i !== _trackIdx) pool.push(i);
   }
   if(!pool.length){
-    for(var i = 0; i < TRACKS.length; i++) if(i !== _trackIdx) pool.push(i);
+    for(var i = 0; i < TRACK_LIST.length; i++) if(i !== _trackIdx) pool.push(i);
   }
   return pool.length ? pool[Math.floor(Math.random() * pool.length)] : 0;
 }
@@ -3599,11 +3592,11 @@ function _playIdx(idx){
     _howl = null;
   }
   _trackIdx = idx;
-  var track  = TRACKS[idx];
+  var track  = TRACK_LIST[idx];
   setSongTitle(track.title);
 
   _howl = new Howl({
-    src:     [track.src],
+    src:     Array.isArray(track.src) ? track.src : [track.src],
     html5:   true,
     volume:  0.55,
     preload: true,
@@ -3615,7 +3608,7 @@ function _playIdx(idx){
     onloaderror:  function(id, err){
       _skipCount++;
       setSongTitle('');
-      if(_mGo && _skipCount < TRACKS.length) _playIdx(_nextIdx());
+      if(_mGo && _skipCount < TRACK_LIST.length) _playIdx(_nextIdx());
     },
     onplayerror:  function(){
       var self = this;
