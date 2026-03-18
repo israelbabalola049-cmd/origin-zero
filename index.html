@@ -593,21 +593,35 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
 
 // Country data: currency, region, exam system, salary factor (multiplier vs global baseline), tax style
 var COUNTRIES={
-  Nigeria:{currency:'\u20a6',region:'West Africa',examSystem:'WAEC/JAMB',salaryFactor:.18,taxStyle:'PAYE',gdpTier:'developing'},
-  Ghana:{currency:'GH\u20b5',region:'West Africa',examSystem:'WASSCE',salaryFactor:.22,taxStyle:'PAYE',gdpTier:'developing'},
-  Senegal:{currency:'CFA',region:'West Africa',examSystem:'Bac',salaryFactor:.15,taxStyle:'flat',gdpTier:'developing'},
-  Kenya:{currency:'KSh',region:'East Africa',examSystem:'KCSE',salaryFactor:.2,taxStyle:'PAYE',gdpTier:'developing'},
-  Ethiopia:{currency:'ETB',region:'East Africa',examSystem:'EGSECE',salaryFactor:.1,taxStyle:'flat',gdpTier:'developing'},
-  'United Kingdom':{currency:'\u00a3',region:'Europe',examSystem:'GCSEs/A-Levels',salaryFactor:1.0,taxStyle:'UK',gdpTier:'developed'},
-  France:{currency:'\u20ac',region:'Europe',examSystem:'Baccalaureat',salaryFactor:.92,taxStyle:'EU',gdpTier:'developed'},
-  Germany:{currency:'\u20ac',region:'Europe',examSystem:'Abitur',salaryFactor:.98,taxStyle:'EU',gdpTier:'developed'},
-  'United States':{currency:'USD',region:'Americas',examSystem:'SAT/ACT',salaryFactor:1.15,taxStyle:'US',gdpTier:'developed'},
-  Canada:{currency:'CAD',region:'Americas',examSystem:'Provincial',salaryFactor:.95,taxStyle:'US',gdpTier:'developed'},
-  Brazil:{currency:'BRL',region:'Americas',examSystem:'ENEM',salaryFactor:.35,taxStyle:'flat',gdpTier:'emerging'},
-  India:{currency:'\u20b9',region:'Asia',examSystem:'JEE/NEET',salaryFactor:.25,taxStyle:'PAYE',gdpTier:'emerging'},
-  Japan:{currency:'\u00a5',region:'Asia',examSystem:'University Entrance',salaryFactor:.88,taxStyle:'EU',gdpTier:'developed'},
-  'South Korea':{currency:'\u20a9',region:'Asia',examSystem:'CSAT',salaryFactor:.82,taxStyle:'EU',gdpTier:'developed'},
+  Nigeria:{currency:'₦',region:'West Africa',examSystem:'WAEC/JAMB',salaryFactor:.18,taxStyle:'PAYE',gdpTier:'developing',fxRate:1600},
+  Ghana:{currency:'GH₵',region:'West Africa',examSystem:'WASSCE',salaryFactor:.22,taxStyle:'PAYE',gdpTier:'developing',fxRate:15.5},
+  Senegal:{currency:'CFA',region:'West Africa',examSystem:'Bac',salaryFactor:.15,taxStyle:'flat',gdpTier:'developing',fxRate:615},
+  Kenya:{currency:'KSh',region:'East Africa',examSystem:'KCSE',salaryFactor:.20,taxStyle:'PAYE',gdpTier:'developing',fxRate:130},
+  Ethiopia:{currency:'ETB',region:'East Africa',examSystem:'EGSECE',salaryFactor:.10,taxStyle:'flat',gdpTier:'developing',fxRate:57},
+  'United Kingdom':{currency:'£',region:'Europe',examSystem:'GCSEs/A-Levels',salaryFactor:1.0,taxStyle:'UK',gdpTier:'developed',fxRate:0.79},
+  France:{currency:'€',region:'Europe',examSystem:'Baccalaureat',salaryFactor:.92,taxStyle:'EU',gdpTier:'developed',fxRate:0.92},
+  Germany:{currency:'€',region:'Europe',examSystem:'Abitur',salaryFactor:.98,taxStyle:'EU',gdpTier:'developed',fxRate:0.92},
+  'United States':{currency:'$',region:'Americas',examSystem:'SAT/ACT',salaryFactor:1.15,taxStyle:'US',gdpTier:'developed',fxRate:1.0},
+  Canada:{currency:'CA$',region:'Americas',examSystem:'Provincial',salaryFactor:.95,taxStyle:'US',gdpTier:'developed',fxRate:1.36},
+  Brazil:{currency:'R$',region:'Americas',examSystem:'ENEM',salaryFactor:.35,taxStyle:'flat',gdpTier:'emerging',fxRate:5.0},
+  India:{currency:'₹',region:'Asia',examSystem:'JEE/NEET',salaryFactor:.25,taxStyle:'PAYE',gdpTier:'emerging',fxRate:83},
+  Japan:{currency:'¥',region:'Asia',examSystem:'University Entrance',salaryFactor:.88,taxStyle:'EU',gdpTier:'developed',fxRate:150},
+  'South Korea':{currency:'₩',region:'Asia',examSystem:'CSAT',salaryFactor:.82,taxStyle:'EU',gdpTier:'developed',fxRate:1350},
 };
+
+var FOOTBALL_LEAGUES={
+  Nigeria:{name:'NPFL',fullName:'Nigeria Premier Football League',clubs:[{name:'Enyimba FC',city:'Aba'},{name:'Kano Pillars',city:'Kano'},{name:'Rivers United',city:'Port Harcourt'},{name:'Lobi Stars',city:'Makurdi'},{name:'Heartland FC',city:'Owerri'},{name:'Sunshine Stars',city:'Akure'},{name:'Remo Stars',city:'Ikenne'},{name:'Nasarawa United',city:'Lafia'}],managers:['Fatai Osho','Stanley Eguma','Fidelis Ilechukwu','Kennedy Boboye']},
+  Ghana:{name:'GPL',fullName:'Ghana Premier League',clubs:[{name:'Accra Hearts of Oak',city:'Accra'},{name:'Kumasi Asante Kotoko',city:'Kumasi'},{name:'Medeama SC',city:'Tarkwa'},{name:'Aduana Stars',city:'Dormaa'}],managers:['Prosper Ogum','Yaw Preko','Samuel Boadu']},
+  'United Kingdom':{name:'Premier League',fullName:'English Premier League',clubs:[{name:'Arsenal',city:'London'},{name:'Chelsea',city:'London'},{name:'Manchester City',city:'Manchester'},{name:'Manchester United',city:'Manchester'},{name:'Liverpool',city:'Liverpool'},{name:'Tottenham Hotspur',city:'London'},{name:'Newcastle United',city:'Newcastle'},{name:'Aston Villa',city:'Birmingham'},{name:'Brighton',city:'Brighton'},{name:'West Ham United',city:'London'}],managers:['Mikel Arteta','Enzo Maresca','Pep Guardiola','Ruben Amorim','Arne Slot','Ange Postecoglou','Eddie Howe','Unai Emery']},
+  France:{name:'Ligue 1',fullName:'Ligue 1',clubs:[{name:'Paris Saint-Germain',city:'Paris'},{name:'Olympique de Marseille',city:'Marseille'},{name:'Olympique Lyonnais',city:'Lyon'},{name:'AS Monaco',city:'Monaco'},{name:'LOSC Lille',city:'Lille'}],managers:['Luis Enrique','Paulo Fonseca','Adi Hutter']},
+  Germany:{name:'Bundesliga',fullName:'Bundesliga',clubs:[{name:'FC Bayern Munich',city:'Munich'},{name:'Borussia Dortmund',city:'Dortmund'},{name:'Bayer Leverkusen',city:'Leverkusen'},{name:'RB Leipzig',city:'Leipzig'},{name:'Eintracht Frankfurt',city:'Frankfurt'}],managers:['Vincent Kompany','Niko Kovac','Xabi Alonso','Marco Rose']},
+  'United States':{name:'MLS',fullName:'Major League Soccer',clubs:[{name:'Inter Miami CF',city:'Miami'},{name:'LA Galaxy',city:'Los Angeles'},{name:'LAFC',city:'Los Angeles'},{name:'Atlanta United',city:'Atlanta'},{name:'Seattle Sounders',city:'Seattle'},{name:'New York City FC',city:'New York'}],managers:['Javier Morales','Greg Vanney','Steve Cherundolo']},
+  Senegal:{name:'Ligue 1 Senegal',fullName:'Ligue 1 Senegal',clubs:[{name:'AS Pikine',city:'Pikine'},{name:'Generation Foot',city:'Dakar'},{name:'Casa Sports',city:'Ziguinchor'}],managers:['Malick Daff','Ibrahima Ndoye']},
+  Kenya:{name:'FKF-PL',fullName:'FKF Premier League',clubs:[{name:'Gor Mahia',city:'Nairobi'},{name:'AFC Leopards',city:'Nairobi'},{name:'Tusker FC',city:'Nairobi'},{name:'Bandari FC',city:'Mombasa'}],managers:['Jonathan McKinstry','Sammy Omollo']},
+  default:{name:'National League',fullName:'National Football League',clubs:[{name:'City FC',city:'Capital City'},{name:'United SC',city:'North City'},{name:'Athletic Club',city:'East City'}],managers:['Coach Williams','Coach Johnson','Coach Okafor']},
+};
+function getLeague(country){return FOOTBALL_LEAGUES[country]||FOOTBALL_LEAGUES['default'];}
+
 
 // Career path definitions: id, label, category, base salary (developed world), ladder titles
 var CAREER_PATHS={
@@ -651,6 +665,54 @@ function calcSalary(path,level,country){
   var levelMult=[0,.8,1.3,2,3.2,5.5,9,16,28,40][Math.min(9,level-1)]||1;
   return Math.round(base*levelMult*countryFactor);
 }
+function makeTeacher(stage){
+  var g=Math.random()>.5?'male':'female';
+  var prefix=stage==='university'?pick(['Dr','Prof']):pick(['Mr','Mrs','Miss']);
+  return{id:'teacher_'+stage,name:prefix+' '+pick(LNAMES),gender:g,age:rnd(28,55),alive:true,relationship:'teacher',personality:pick(['strict','kind','inspiring','boring','tough but fair']),trust:50,closeness:30,subject:pick(['Mathematics','English','Science','History','Economics','Art','PE'])};
+}
+function makeClassmate(age){
+  var g=Math.random()>.5?'male':'female';
+  return{id:'cm_'+Date.now()+'_'+rnd(0,9999),name:pick(FNAMES[g])+' '+pick(LNAMES),gender:g,age:age+rnd(-1,1),alive:true,relationship:'classmate',personality:pick(['friendly','quiet','funny','nerdy','popular','sporty','artistic']),trust:rnd(20,50),closeness:rnd(10,40),crush:false};
+}
+function initSchoolNPCs(stage){
+  if(G.education.teacher&&G.education.teacher.id&&G.education.teacher.id.indexOf(stage)>=0)return;
+  G.education.teacher=makeTeacher(stage);
+  G.education.classmates=[];
+  for(var i=0;i<rnd(4,6);i++)G.education.classmates.push(makeClassmate(G.age));
+}
+function makeCoworker(careerPath){
+  var g=Math.random()>.5?'male':'female';
+  var roles={football:['Goalkeeper','Defender','Midfielder','Winger','Striker'],basketball:['Point Guard','Shooting Guard','Small Forward','Center'],afrobeats:['Producer','Engineer','Hype Man','A&R'],hiphop:['Producer','DJ','Engineer','Label Rep'],corporate:['Analyst','Associate','Manager','PA'],medicine:['Nurse','Fellow','Registrar','Senior Doctor'],law:['Paralegal','Associate','Barrister','Solicitor'],default:['Colleague','Associate','Team Lead','Analyst']};
+  var roleList=roles[careerPath]||roles['default'];
+  return{id:'cw_'+Date.now()+'_'+rnd(0,9999),name:pick(FNAMES[g])+' '+pick(LNAMES),gender:g,age:rnd(20,42),alive:true,relationship:'coworker',role:pick(roleList),personality:pick(['ambitious','supportive','lazy','competitive','loyal','difficult']),trust:rnd(30,60),closeness:rnd(20,50)};
+}
+function initCareerNPCs(careerPath,country){
+  if(!G.career.coworkers)G.career.coworkers=[];
+  G.career.coworkers=[];
+  var count=['football','basketball','athletics'].includes(careerPath)?5:rnd(2,4);
+  for(var i=0;i<count;i++)G.career.coworkers.push(makeCoworker(careerPath));
+  if(['football','basketball','athletics'].includes(careerPath)){
+    var lg=getLeague(country);var club=pick(lg.clubs);
+    G.career.club=club.name;G.career.league=lg.name;
+    G.career.manager={name:pick(lg.managers),relationship:'manager',trust:50,closeness:40,personality:pick(['demanding','supportive','tactical','motivating','cold'])};
+    addLog(G.age,'Signed for '+G.career.club+' ('+G.career.league+').','career');
+  } else {
+    var mg=Math.random()>.5?'male':'female';
+    G.career.manager={name:pick(FNAMES[mg])+' '+pick(LNAMES),relationship:'supervisor',trust:50,closeness:35,personality:pick(['strict','fair','supportive','difficult'])};
+  }
+}
+function updateFootballStats(){
+  if(!G.career.path||!['football','basketball','athletics'].includes(G.career.path))return;
+  if(!G.career.stats)G.career.stats={goals:0,assists:0,seasonGoals:0,seasonAssists:0,appearances:0,seasonApps:0,performance:50,form:50};
+  var perf=getCareerPerf();var apps=rnd(20,38);var goals=0,assists=0;
+  if(G.career.path==='football'){var goalRate=(perf/100)*(G.career.level/10);goals=Math.round(apps*goalRate*rnd(4,12)/10);assists=Math.round(apps*(perf/200)*rnd(3,7)/10);}
+  G.career.stats.seasonGoals=goals;G.career.stats.seasonAssists=assists;G.career.stats.seasonApps=apps;
+  G.career.stats.goals=(G.career.stats.goals||0)+goals;G.career.stats.assists=(G.career.stats.assists||0)+assists;G.career.stats.appearances=(G.career.stats.appearances||0)+apps;
+  G.career.stats.form=Math.round(((G.career.stats.form||50)*0.6)+(perf*0.4));G.career.stats.performance=perf;
+  if(goals>=20)toast((G.career.club||'')+' — '+goals+' goals this season! ⚽');
+  else if(goals>=10)toast(goals+' goals, '+assists+' assists this season.');
+}
+
 
 // Tax calculation by country and income
 function calcTax(income,country){
@@ -727,8 +789,8 @@ function newState(name,gender,country,bg,birthYear){
     stats:{health:rs(70,b.statMod.health),happiness:rs(65,b.statMod.happiness),intelligence:rs(50,b.statMod.intelligence),looks:rs(55,b.statMod.looks)},
     hidden:{karma:50,reputation:40,stress:20,luck:rnd(30,70)},
     finances:{cash:b.cash,debt:0,annualIncome:0,annualExpenses:b.annualExpenses,netWorth:b.cash,investments:[],taxPaid:0,lifetimeEarnings:0},
-    career:{path:null,title:'Unemployed',level:0,salary:0,yearsInRole:0,employer:null,industry:null,history:[],peakLevel:0},
-    education:{stage:'none',institution:null,gpa:null,examScores:{},degree:null,graduated:false,droppedOut:false,currentYear:null},
+    career:{path:null,title:'Unemployed',level:0,salary:0,yearsInRole:0,employer:null,industry:null,history:[],peakLevel:0,club:null,league:null,manager:null,coworkers:[],stats:{goals:0,assists:0,seasonGoals:0,seasonAssists:0,appearances:0,seasonApps:0,performance:50,form:50}},
+    education:{stage:'none',institution:null,gpa:null,examScores:{},degree:null,graduated:false,droppedOut:false,currentYear:null,teacher:null,classmates:[]},
     npcs:{mother:makeParent('mother'),father:makeParent('father'),siblings:[],friends:[],enemies:[],partner:null,exes:[],children:[],rivals:[],mentor:null},
     fame:{level:0,popularity:rnd(35,55),fanCount:0,publicImage:50,scandals:[],awards:[],pressRel:50},
     assets:{phone:null,car:null,properties:[],wardrobe:{tier:'basic',value:0},jewelry:[],watches:[],gadgets:[],vehicles:[]},
@@ -1883,8 +1945,8 @@ function getNPC(id){
 /* === SECTION 9: CAREER ENGINE === */
 function updateEducation(){
   var a=G.age;
-  if(a>=5&&a<=10&&G.education.stage==='none')G.education.stage='primary';
-  if(a>=11&&a<=17&&G.education.stage==='primary')G.education.stage='secondary';
+  if(a>=5&&a<=10&&G.education.stage==='none'){G.education.stage='primary';initSchoolNPCs('primary');}
+  if(a>=11&&a<=17&&G.education.stage==='primary'){G.education.stage='secondary';G.education.teacher=null;G.education.classmates=[];initSchoolNPCs('secondary');}
   if(G.flags.going_university&&G.flags.started_university&&G.education.stage==='secondary')
     G.education.stage='university';
   if(G.flags.dropped_out_uni&&G.education.stage==='university')
@@ -1914,6 +1976,7 @@ function enterCareerPath(pathId, startLevel){
   G.finances.annualIncome=G.career.salary;
   G.career.peakLevel=Math.max(G.career.peakLevel||0,lvl);
   addLog(G.age,'Started career: '+cp.label,'career');
+  initCareerNPCs(pathId,G.country);
 }
 
 // Annual career progression -- called every age up
@@ -1921,6 +1984,7 @@ function updateCareer(){
   if(!G.career.path)return;
   G.career.yearsInRole=(G.career.yearsInRole||0)+1;
   var cp=CAREER_PATHS[G.career.path];if(!cp)return;
+  updateFootballStats();
 
   // Performance score based on stats
   var perf=getCareerPerf();
@@ -2676,32 +2740,91 @@ function openSchoolModal(){
   var stage=G.education.stage;
   var gpa=G.education.gpa||2.5;
   var gpaLabel=gpa>=3.7?'First Class':gpa>=3.3?'Upper Second':gpa>=2.7?'Lower Second':gpa>=2.0?'Third Class':'Failing';
-
-  var content=`
-    <div style="margin-bottom:16px">
-      <div class="pl-lbl">Stage</div>
-      <div style="font-size:15px;color:var(--text);margin-bottom:8px">${stage.charAt(0).toUpperCase()+stage.slice(1)} School</div>
-      ${stage==='university'?`${SR('GPA',gpa*25,'var(--cyan)')}<div style="font-family:var(--fm);font-size:10px;color:var(--gold);margin-top:2px">${gpaLabel}</div>`:''}
-    </div>
-    <div style="margin-bottom:14px;padding:12px;background:var(--s2);border-radius:6px">
-      <div class="pl-lbl" style="margin-bottom:8px">Academic Actions</div>
-      <div style="display:flex;flex-wrap:wrap;gap:7px">
-        <button class="btn btn-sm btn-s" onclick="studyAction()">📖 Study Hard</button>
-        <button class="btn btn-sm btn-s" onclick="extraLessonsAction()">\u270f\ufe0f Extra Lessons</button>
-        ${stage==='secondary'?`<button class="btn btn-sm btn-s" onclick="joinClubAction()">🎭 Join a Club</button>`:''}
-        ${stage==='university'?`<button class="btn btn-sm btn-s" onclick="joinSocietyAction()">🎓 Join Society</button>`:''}
-        <button class="btn btn-sm btn-s" style="color:var(--danger);border-color:var(--danger)" onclick="dropOutAction()">🚪 Drop Out</button>
-      </div>
-    </div>`;
-
-  // Clubs/societies
-  var clubs=G.flags.school_clubs||[];
-  if(clubs.length>0){
-    content+=`<div class="pl-lbl" style="margin-bottom:6px">Clubs & Societies</div>`;
-    clubs.forEach(c=>{content+=`<div style="font-family:var(--fm);font-size:11px;color:var(--cyan);padding:4px 0">\u2713 ${c}</div>`;});
+  var teacherHTML='';
+  if(G.education.teacher){
+    var t=G.education.teacher;
+    teacherHTML=ACC('teacher','&#128218;',t.name,'Your '+t.subject+' teacher',
+      SR('Trust',t.trust||0,'var(--cyan)')+
+      '<div style="font-size:12px;color:var(--dim);margin:6px 0">'+t.personality+'</div>'+
+      '<div class="acc-actions">'+
+        '<button class="btn btn-sm btn-s" onclick="talkToTeacher()">&#128172; Talk</button>'+
+        '<button class="btn btn-sm btn-s" onclick="askTeacherHelp()">&#128214; Ask for Help</button>'+
+      '</div>');
   }
-
-  showModal('School',content);
+  var classmatesHTML='';
+  if(G.education.classmates&&G.education.classmates.length){
+    classmatesHTML='<div class="pl-lbl" style="margin:14px 0 8px">Classmates</div>';
+    for(var ci=0;ci<G.education.classmates.length;ci++){
+      var c=G.education.classmates[ci];
+      var isFriend=G.npcs.friends.some(function(f){return f.id===c.id;});
+      var canCrush=G.age>=13&&!c.crush&&!isFriend&&!G.npcs.partner;
+      var btns='<div class="acc-actions">';
+      if(isFriend){btns+='<span style="font-family:var(--fm);font-size:9px;color:var(--success)">&#10003; Friend</span>';}
+      else{btns+='<button class="btn btn-sm btn-s" data-cm-id="'+c.id+'" onclick="befriendClassmate(this.dataset.cmId)">&#129309; Befriend</button>';}
+      if(canCrush){btns+='<button class="btn btn-sm btn-s" data-cm-id="'+c.id+'" onclick="crushOnClassmate(this.dataset.cmId)">&#128152; Ask Out</button>';}
+      btns+='</div>';
+      classmatesHTML+=ACC(c.id,c.gender==='female'?'&#128105;':'&#128102;',c.name,c.personality,
+        SR('Closeness',c.closeness||0,'var(--orange)')+SR('Trust',c.trust||0,'var(--cyan)')+btns);
+    }
+  }
+  var clubs=G.flags.school_clubs||[];
+  var clubsHTML='';
+  if(clubs.length){clubsHTML='<div class="pl-lbl" style="margin-bottom:6px">Clubs</div>';clubs.forEach(function(c){clubsHTML+='<div style="font-family:var(--fm);font-size:11px;color:var(--cyan);padding:4px 0">&#10003; '+c+'</div>';});}
+  showModal('School',
+    '<div style="margin-bottom:16px">'+
+      '<div class="pl-lbl">Stage</div>'+
+      '<div style="font-size:15px;color:var(--text);margin-bottom:8px">'+stage.charAt(0).toUpperCase()+stage.slice(1)+'</div>'+
+      (stage==='university'?SR('GPA',gpa*25,'var(--cyan)')+'<div style="font-family:var(--fm);font-size:10px;color:var(--gold);margin-top:2px">'+gpaLabel+'</div>':'')+
+    '</div>'+
+    '<div style="margin-bottom:14px;padding:12px;background:var(--s2);border-radius:6px">'+
+      '<div class="pl-lbl" style="margin-bottom:8px">Actions</div>'+
+      '<div style="display:flex;flex-wrap:wrap;gap:7px">'+
+        '<button class="btn btn-sm btn-s" onclick="studyAction()">&#128214; Study Hard</button>'+
+        '<button class="btn btn-sm btn-s" onclick="extraLessonsAction()">&#9999;&#65039; Extra Lessons</button>'+
+        (stage==='secondary'?'<button class="btn btn-sm btn-s" onclick="joinClubAction()">&#127917; Join Club</button>':'')+
+        (stage==='university'?'<button class="btn btn-sm btn-s" onclick="joinSocietyAction()">&#127891; Join Society</button>':'')+
+        '<button class="btn btn-sm btn-s" style="color:var(--danger);border-color:var(--danger)" onclick="dropOutAction()">&#128682; Drop Out</button>'+
+      '</div>'+
+    '</div>'+
+    teacherHTML+classmatesHTML+clubsHTML);
+}
+function talkToTeacher(){
+  closeModal();var t=G.education.teacher;if(!t)return;
+  t.closeness=Math.min(100,(t.closeness||0)+rnd(3,8));t.trust=Math.min(100,(t.trust||0)+rnd(2,5));
+  applyStats({happiness:rnd(2,6)});addLog(G.age,'Talked to '+t.name+'.','school');renderStats();save();
+  toast('Good chat with '+t.name+'.');
+}
+function askTeacherHelp(){
+  closeModal();var t=G.education.teacher;if(!t)return;
+  var gain=rnd(3,8);G.stats.intelligence=Math.min(100,G.stats.intelligence+gain);
+  if(G.education.stage==='university')G.education.gpa=Math.min(4.0,(G.education.gpa||2.5)+.06);
+  t.closeness=Math.min(100,(t.closeness||0)+5);
+  addLog(G.age,'Extra help from '+t.name+'.','school');renderStats();save();
+  toast(t.name+' helped. +'+gain+' Intelligence.');
+}
+function befriendClassmate(id){
+  closeModal();var c=G.education.classmates.find(function(x){return x.id===id;});if(!c)return;
+  if(G.npcs.friends.some(function(f){return f.id===id;})){toast('Already friends.');return;}
+  c.closeness=Math.min(100,(c.closeness||0)+rnd(10,20));c.trust=Math.min(100,(c.trust||0)+rnd(8,15));
+  c.relationship='friend';G.npcs.friends.push(c);
+  applyStats({happiness:rnd(8,15)});applyHidden({karma:3});
+  addLog(G.age,'Made friends with '+c.name+'.','family');renderStats();save();
+  toast(c.name+' is now your friend!');
+}
+function crushOnClassmate(id){
+  closeModal();var c=G.education.classmates.find(function(x){return x.id===id;});if(!c)return;
+  c.crush=true;
+  var success=Math.random()<(0.3+(G.stats.looks/300)+(c.closeness/200));
+  if(success){
+    G.npcs.partner=c;G.flags.in_relationship=true;c.relationship='partner';
+    applyStats({happiness:rnd(15,25)});applyHidden({karma:5,stress:8});
+    addLog(G.age,'Started dating '+c.name+'.','romance');renderStats();save();
+    toast(c.name+' said yes! &#128152;');
+  } else {
+    applyStats({happiness:-rnd(5,12)});applyHidden({stress:10});
+    addLog(G.age,'Confessed to '+c.name+'... they said no.','romance');renderStats();save();
+    toast(c.name+' said no. That stings.');
+  }
 }
 
 function studyAction(){
@@ -2751,57 +2874,126 @@ function dropOutAction(){
 function openCareerModal(){
   var cp=G.career.path&&CAREER_PATHS[G.career.path];
   var inEdu=G.education.stage&&G.education.stage!=='none'&&G.education.stage!=='graduate';
-
+  var isSports=cp&&cp.cat==='sports';
   var content='';
-
   if(!G.career.path&&!inEdu){
-    // No career yet
-    content=`<div style="margin-bottom:14px;font-size:13px;color:var(--dim);font-style:italic">No career path yet. Choose your direction.</div>
-    <div style="display:flex;flex-direction:column;gap:8px">
-      ${G.age>=16?`<button class="btn btn-s" onclick="lookForWork()">🔍 Look for Entry-Level Work</button>`:''}
-      ${G.age>=18&&G.flags.graduated_university?`<button class="btn btn-s" onclick="startGraduateJob()">🎓 Apply for Graduate Roles</button>`:''}
-      ${G.age>=14&&G.flags.early_athlete?`<button class="btn btn-s" onclick="chooseSportsPath()">\u26bd Pursue Sports</button>`:''}
-      ${G.flags.childhood_music?`<button class="btn btn-s" onclick="chooseMusicPath()">🎵 Pursue Music</button>`:''}
-      ${G.age>=18?`<button class="btn btn-s" onclick="startBusinessPath()">🏢 Start a Business</button>`:''}
-    </div>`;
+    content='<div style="margin-bottom:14px;font-size:13px;color:var(--dim);font-style:italic">No career path yet.</div>'+
+    '<div style="display:flex;flex-direction:column;gap:8px">'+
+      (G.age>=16?'<button class="btn btn-s" onclick="lookForWork()">&#128269; Entry-Level Work</button>':'')+
+      (G.age>=18&&G.flags.graduated_university?'<button class="btn btn-s" onclick="startGraduateJob()">&#127891; Graduate Roles</button>':'')+
+      (G.age>=14&&G.flags.early_athlete?'<button class="btn btn-s" onclick="chooseSportsPath()">&#9917; Pursue Sports</button>':'')+
+      (G.flags.childhood_music?'<button class="btn btn-s" onclick="chooseMusicPath()">&#127925; Pursue Music</button>':'')+
+      (G.age>=18?'<button class="btn btn-s" onclick="startBusinessPath()">&#127970; Start a Business</button>':'')+
+    '</div>';
   } else if(cp){
-    var ladder=cp.ladder.map((t,i)=>{
-      var done=i<(G.career.level-1),cur=i===(G.career.level-1);
-      return`<div style="font-family:var(--fm);font-size:10px;color:${cur?'var(--orange)':done?'var(--success)':'var(--muted)'};padding:3px 0">${cur?'\u25b6':done?'\u2713':' '} ${i+1}. ${t}</div>`;
-    }).join('');
+    var perf=G.career.stats&&G.career.stats.performance||getCareerPerf();
+    var form=G.career.stats&&G.career.stats.form||50;
+    var perfColor=perf>=70?'var(--success)':perf>=45?'var(--gold)':'var(--danger)';
+    var formColor=form>=70?'var(--success)':form>=45?'var(--gold)':'var(--danger)';
+    var clubHeader='';
+    if(G.career.club){
+      clubHeader='<div style="background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:14px">'+
+        '<div style="font-family:var(--fd);font-size:22px;color:var(--orange);letter-spacing:.05em">'+G.career.club+'</div>'+
+        '<div style="font-family:var(--fm);font-size:10px;color:var(--cyan);margin-top:2px">'+G.career.league+'</div>'+
+        (G.career.manager?'<div style="font-family:var(--fm);font-size:10px;color:var(--muted);margin-top:4px">Manager: <span style="color:var(--dim)">'+G.career.manager.name+'</span></div>':'')+
+      '</div>';
+    }
+    var statsHTML='';
+    if(isSports&&G.career.stats){
+      var s=G.career.stats;
+      statsHTML='<div style="margin-bottom:14px">'+
+        '<div class="pl-lbl" style="margin-bottom:8px">This Season</div>'+
+        '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">'+
+          '<div class="mi"><div class="mi-lbl">Goals</div><div class="mi-val" style="color:var(--orange);font-size:18px">'+s.seasonGoals+'</div></div>'+
+          '<div class="mi"><div class="mi-lbl">Assists</div><div class="mi-val" style="color:var(--cyan);font-size:18px">'+s.seasonAssists+'</div></div>'+
+          '<div class="mi"><div class="mi-lbl">Apps</div><div class="mi-val" style="color:var(--text);font-size:18px">'+s.seasonApps+'</div></div>'+
+        '</div>'+
+        '<div class="pl-lbl" style="margin-bottom:8px">Career Total</div>'+
+        '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">'+
+          '<div class="mi"><div class="mi-lbl">Goals</div><div class="mi-val acc">'+s.goals+'</div></div>'+
+          '<div class="mi"><div class="mi-lbl">Assists</div><div class="mi-val acc">'+s.assists+'</div></div>'+
+          '<div class="mi"><div class="mi-lbl">Apps</div><div class="mi-val acc">'+s.appearances+'</div></div>'+
+        '</div>'+
+      '</div>';
+    }
     var bench=REAL_PEOPLE_BENCHMARKS[G.career.path]&&REAL_PEOPLE_BENCHMARKS[G.career.path][G.career.level];
-    content=`
-      <div style="margin-bottom:14px">
-        <div class="pl-lbl">Role</div>
-        <div style="font-family:var(--fd);font-size:18px;color:var(--text);letter-spacing:.04em">${G.career.title}</div>
-        <div style="font-family:var(--fm);font-size:10px;color:var(--cyan);margin-top:3px">${cp.label} \u00b7 Level ${G.career.level}/10</div>
-      </div>
-      <div style="margin-bottom:14px">
-        <div class="pl-lbl">Salary</div>
-        <div style="font-family:var(--fm);font-size:15px;color:var(--cyan)">${money(G.career.salary)}/yr</div>
-      </div>
-      ${bench?`<div style="background:var(--s2);border:1px solid var(--border);border-radius:4px;padding:11px;margin-bottom:14px;font-size:12px;color:var(--gold);font-style:italic">"${bench}"</div>`:''}
-      <div style="margin-bottom:14px;padding:12px;background:var(--s2);border-radius:6px">
-        <div class="pl-lbl" style="margin-bottom:8px">Career Actions</div>
-        <div style="display:flex;flex-wrap:wrap;gap:7px">
-          <button class="btn btn-sm btn-s" onclick="workHarderAction()">💼 Work Harder</button>
-          <button class="btn btn-sm btn-s" onclick="networkAction()">🤝 Network</button>
-          ${cp.cat==='sports'?`<button class="btn btn-sm btn-s" onclick="trainSportAction()">🏃 Train</button>
-            <button class="btn btn-sm btn-s" onclick="talkCoachAction()">👨\u200d🏫 Talk to Coach</button>
-            <button class="btn btn-sm btn-s" onclick="teamBondAction()">👥 Team Bonding</button>`:''}
-          ${['afrobeats','hiphop','rnb','music_production'].includes(G.career.path||'')?`<button class="btn btn-sm btn-s" onclick="recordAction()">🎵 Record</button>
-            <button class="btn btn-sm btn-s" onclick="collabAction()">🎤 Collab</button>`:''}
-          ${cp.cat==='business'?`<button class="btn btn-sm btn-s" onclick="pitchAction()">📊 Pitch Investors</button>`:''}
-        </div>
-      </div>
-      <div><div class="pl-lbl" style="margin-bottom:7px">Career Ladder</div>${ladder}</div>`;
+    var ladder=cp.ladder.map(function(t,i){var done=i<(G.career.level-1),cur=i===(G.career.level-1);return'<div style="font-family:var(--fm);font-size:10px;color:'+(cur?'var(--orange)':done?'var(--success)':'var(--muted)')+';padding:3px 0">'+(cur?'&#9654;':done?'&#10003;':' ')+' '+(i+1)+'. '+t+'</div>';}).join('');
+    var managerHTML='';
+    if(G.career.manager){
+      var m=G.career.manager;
+      managerHTML=ACC('manager','&#128084;',m.name,m.relationship+' · '+m.personality,
+        SR('Trust',m.trust||0,'var(--cyan)')+SR('Closeness',m.closeness||0,'var(--orange)')+
+        '<div class="acc-actions">'+
+          '<button class="btn btn-sm btn-s" onclick="talkManager()">&#128172; Talk</button>'+
+          (isSports?'<button class="btn btn-sm btn-s" onclick="askForPlaytime()">&#9917; Playtime</button>':'<button class="btn btn-sm btn-s" onclick="askForRaise()">&#128176; Ask Raise</button>')+
+          (isSports?'<button class="btn btn-sm btn-s" onclick="openTransferModal()">&#128260; Transfer</button>':'')+
+        '</div>');
+    }
+    var coworkersHTML='';
+    if(G.career.coworkers&&G.career.coworkers.length){
+      coworkersHTML='<div class="pl-lbl" style="margin:14px 0 8px">'+(isSports?'Teammates':'Colleagues')+'</div>';
+      G.career.coworkers.slice(0,4).forEach(function(cw){
+        coworkersHTML+=ACC(cw.id,'&#128100;',cw.name,cw.role+' · '+cw.personality,
+          SR('Trust',cw.trust||0,'var(--cyan)')+SR('Closeness',cw.closeness||0,'var(--orange)')+
+          '<div class="acc-actions">'+
+            '<button class="btn btn-sm btn-s" data-cw-id="'+cw.id+'" onclick="talkCoworker(this.dataset.cwId)">&#128172; Talk</button>'+
+            '<button class="btn btn-sm btn-s" data-cw-id="'+cw.id+'" onclick="befriendCoworker(this.dataset.cwId)">&#129309; Bond</button>'+
+          '</div>');
+      });
+    }
+    content=clubHeader+
+      '<div style="margin-bottom:14px"><div class="pl-lbl">Role</div>'+
+        '<div style="font-family:var(--fd);font-size:18px;color:var(--text)">'+G.career.title+'</div>'+
+        '<div style="font-family:var(--fm);font-size:10px;color:var(--cyan);margin-top:3px">'+cp.label+' · Level '+G.career.level+'/10</div></div>'+
+      '<div style="margin-bottom:14px"><div class="pl-lbl">Salary</div>'+
+        '<div style="font-family:var(--fm);font-size:15px;color:var(--cyan)">'+money(G.career.salary)+'/yr</div></div>'+
+      SR('Performance',perf,perfColor)+SR('Form',form,formColor)+
+      statsHTML+
+      (bench?'<div style="background:var(--s2);border:1px solid var(--border);border-radius:4px;padding:11px;margin-bottom:14px;font-size:12px;color:var(--gold);font-style:italic">"'+bench+'"</div>':'')+
+      '<div style="margin-bottom:14px;padding:12px;background:var(--s2);border-radius:6px">'+
+        '<div class="pl-lbl" style="margin-bottom:8px">Actions</div>'+
+        '<div style="display:flex;flex-wrap:wrap;gap:7px">'+
+          '<button class="btn btn-sm btn-s" onclick="workHarderAction()">&#128188; Work Harder</button>'+
+          '<button class="btn btn-sm btn-s" onclick="networkAction()">&#129309; Network</button>'+
+          (isSports?'<button class="btn btn-sm btn-s" onclick="trainSportAction()">&#127939; Train</button>':'')+
+          (['afrobeats','hiphop','rnb','music_production'].includes(G.career.path||'')?'<button class="btn btn-sm btn-s" onclick="recordAction()">&#127925; Record</button><button class="btn btn-sm btn-s" onclick="collabAction()">&#127908; Collab</button>':'')+
+          (cp.cat==='business'?'<button class="btn btn-sm btn-s" onclick="pitchAction()">&#128202; Pitch</button>':'')+
+          (G.age>=32&&isSports?'<button class="btn btn-sm btn-s" style="color:var(--gold);border-color:var(--gold)" onclick="retireFromSports()">&#127942; Retire</button>':'')+
+        '</div></div>'+
+      '<div><div class="pl-lbl" style="margin-bottom:7px">Career Ladder</div>'+ladder+'</div>'+
+      managerHTML+coworkersHTML;
   } else if(inEdu){
-    content=`<div style="font-size:13px;color:var(--dim);font-style:italic">Currently in ${eduLabel()}. Career will open after.</div>`;
+    content='<div style="font-size:13px;color:var(--dim);font-style:italic">In '+eduLabel()+'. Career opens after.</div>';
   }
-
-  content+=`<div style="margin-top:14px;font-family:var(--fm);font-size:10px;color:var(--muted)">Lifetime Earnings: ${money(G.finances.lifetimeEarnings||0)}</div>`;
+  content+='<div style="margin-top:14px;font-family:var(--fm);font-size:10px;color:var(--muted)">Lifetime Earnings: '+money(G.finances.lifetimeEarnings||0)+'</div>';
   showModal('Career',content);
 }
+function talkCoworker(id){closeModal();var cw=(G.career.coworkers||[]).find(function(c){return c.id===id;});if(!cw)return;cw.closeness=Math.min(100,(cw.closeness||0)+rnd(4,10));cw.trust=Math.min(100,(cw.trust||0)+rnd(3,7));applyStats({happiness:rnd(3,8)});addLog(G.age,'Chatted with '+cw.name+'.','action');renderStats();save();toast('Good talk with '+cw.name+'.');}
+function befriendCoworker(id){closeModal();var cw=(G.career.coworkers||[]).find(function(c){return c.id===id;});if(!cw)return;if(G.npcs.friends.some(function(f){return f.id===id;})){toast('Already friends.');return;}cw.closeness=Math.min(100,(cw.closeness||0)+rnd(12,20));cw.trust=Math.min(100,(cw.trust||0)+rnd(8,15));cw.relationship='friend';G.npcs.friends.push(cw);applyStats({happiness:rnd(8,14)});applyHidden({karma:3});addLog(G.age,'Became friends with '+cw.name+'.','family');renderStats();save();toast(cw.name+' is now a friend!');}
+function talkManager(){closeModal();var m=G.career.manager;if(!m)return;m.closeness=Math.min(100,(m.closeness||0)+rnd(3,8));m.trust=Math.min(100,(m.trust||0)+rnd(2,5));applyStats({happiness:rnd(2,7)});addLog(G.age,'Spoke with '+m.name+'.','action');renderStats();save();toast('Had a word with '+m.name+'.');}
+function askForPlaytime(){closeModal();var m=G.career.manager;if(!m)return;var perf=G.career.stats&&G.career.stats.performance||50;if(perf>60&&(m.trust||0)>55){G.career.stats.seasonApps=Math.min(38,(G.career.stats.seasonApps||0)+rnd(3,6));applyHidden({reputation:rnd(3,7)});addLog(G.age,'Manager increased playing time.','career');renderStats();save();toast(m.name+': You will get your chance.');}else{toast(m.name+': Prove yourself in training first.');}}
+function askForRaise(){closeModal();var m=G.career.manager;if(!m)return;var perf=G.career.stats&&G.career.stats.performance||50;if(perf>65&&(m.trust||0)>60){var raise=rnd(2000,8000);G.career.salary+=raise;G.finances.annualIncome+=raise;addLog(G.age,'Got a salary raise of '+money(raise)+'/yr.','career');renderStats();save();toast('Raise secured: +'+money(raise)+'/yr!');}else{toast(m.name+': Not the right time. Keep performing.');}}
+function openTransferModal(){var lg=getLeague(G.country);var clubs=lg.clubs.filter(function(c){return c.name!==G.career.club;});var opts=clubs.map(function(c){return'<button class="btn btn-s" data-club="'+c.name+'" onclick="requestTransfer(this.dataset.club)">'+c.name+'</button>';}).join('');showModal('Request Transfer','<div style="margin-bottom:14px;font-size:13px;color:var(--dim)">Where do you want to go?</div><div style="display:flex;flex-direction:column;gap:8px">'+opts+'</div>');}
+function requestTransfer(clubName){closeModal();var perf=G.career.stats&&G.career.stats.performance||50;if(Math.random()<(perf/150)){var lg=getLeague(G.country);G.career.club=clubName;G.career.manager={name:pick(lg.managers),relationship:'manager',trust:45,closeness:30,personality:pick(['demanding','supportive','tactical','motivating','cold'])};G.career.coworkers=[];for(var i=0;i<5;i++)G.career.coworkers.push(makeCoworker(G.career.path));addLog(G.age,'Transferred to '+clubName+'.','career');renderStats();save();toast('Transfer approved! Welcome to '+clubName+'.');}else{toast(clubName+' rejected the transfer. Keep performing.');}}
+function retireFromSports(){
+  closeModal();
+  var s=G.career.stats||{goals:0,assists:0,appearances:0};
+  addLog(G.age,'Retired from professional sport. Career: '+s.goals+' goals, '+s.assists+' assists, '+s.appearances+' apps.','career');
+  G.career.path=null;G.career.club=null;G.career.league=null;
+  G.career.title='Retired';G.career.salary=0;G.finances.annualIncome=0;
+  G.career.coworkers=[];G.career.manager=null;
+  renderStats();save();
+  showModal('Life After Sport',
+    '<div style="font-size:13px;color:var(--dim);margin-bottom:16px;font-style:italic">Your playing days are over. What next?</div>'+
+    '<div style="display:flex;flex-direction:column;gap:9px">'+
+      '<button class="btn btn-s" data-type="coaching" onclick="postSportsCareer(this.dataset.type)">&#128104;&#8205;&#127979; Coaching</button>'+
+      '<button class="btn btn-s" data-type="media" onclick="postSportsCareer(this.dataset.type)">&#127897;&#65039; Sports Media</button>'+
+      '<button class="btn btn-s" data-type="business" onclick="postSportsCareer(this.dataset.type)">&#127970; Business</button>'+
+      '<button class="btn btn-s" onclick="closeModal()">Rest for now</button>'+
+    '</div>');
+}
+
+function postSportsCareer(type){closeModal();var paths={coaching:'corporate',media:'journalism',business:'entrepreneur'};var titles={coaching:'Youth Coach',media:'Sports Pundit',business:'Founder'};enterCareerPath(paths[type]||'corporate',2);G.career.title=titles[type]||G.career.title;addLog(G.age,'New chapter: '+G.career.title+'.','career');renderStats();save();toast('New chapter: '+G.career.title+'.');}
 
 // Career actions
 function workHarderAction(){
@@ -3446,11 +3638,14 @@ function clamp(v,a,b){return Math.min(b,Math.max(a,v));}
 function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 function money(n){
-  if(!G)return'$0';
-  var cur=((COUNTRIES[G.country]?COUNTRIES[G.country].currency:undefined))||'$';
-  var a=Math.abs(Math.round(n||0));
-  var f=a>=1000000000?(a/1e9).toFixed(1)+'B':a>=1000000?(a/1e6).toFixed(1)+'M':a>=1000?(a/1000).toFixed(0)+'K':a.toString();
-  return(n<0?'-':'')+cur+f;
+  if(!G)return '$0';
+  var cd=COUNTRIES[G.country];var cur=(cd&&cd.currency)||'$';var fx=(cd&&cd.fxRate)||1;
+  var local=Math.round((n||0)*fx);var a=Math.abs(local);var f;
+  if(a>=1000000000)f=(a/1e9).toFixed(1)+'B';
+  else if(a>=1000000)f=(a/1e6).toFixed(1)+'M';
+  else if(a>=1000)f=(a/1000).toFixed(0)+'K';
+  else f=a.toString();
+  return(local<0?'-':'')+cur+f;
 }
 function toast(msg){
   var t=document.getElementById('toast');
