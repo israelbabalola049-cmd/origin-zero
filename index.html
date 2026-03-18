@@ -245,6 +245,15 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
 .le-item.cat-world{color:#a0a0d0}
 .le-item.cat-action{color:var(--text)}
 
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:200;justify-content:center;align-items:center}
+.ov.on{display:flex;animation:fadeIn .18s ease}
+.mo{background:var(--surface);border:1px solid var(--border);border-radius:6px;width:92%;max-width:480px;max-height:82vh;overflow-y:auto;display:flex;flex-direction:column}
+.mo-h{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.mo-t{font-family:var(--fd);font-size:20px;letter-spacing:.05em;color:var(--text)}
+.mo-x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px 8px;-webkit-tap-highlight-color:transparent}
+.mo-x:hover{color:var(--text)}
+.mo-b{padding:16px;overflow-y:auto}
+
 @media(max-width:640px){
   :root{--th:44px;--bh:56px}
 
@@ -284,7 +293,7 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
   .toast{bottom:64px}
   .gtop-stat.hm{display:none}
 }
-@media(min-width:641px){.ov{align-items:center}.mo{border-radius:6px;max-height:80vh}}
+@media(min-width:641px){}
 
 /* ── ACCORDION ── */
 .acc{border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:10px}
@@ -401,12 +410,11 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
   .pr{display:none}
 }
 @media(min-width:901px){
-  .ov{align-items:center}
-  .mo{border-radius:6px;max-height:80vh}
-}
+  }
 
 @media(max-width:480px){
 }</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
 </head>
 <body>
 
@@ -746,7 +754,7 @@ function makeFriend(age){
 
 // ch() helper: build a choice object concisely
 function ch(text,narrative,stats,hidden,flags,finances,npcEffects,special){
-  return{text,condition:null,outcome:{narrative,stats:stats||{},hidden:hidden||{},flags:flags||{},finances:finances||{},npcEffects:npcEffects||[],triggerEvent:null,achievement:null,...(special||{})}};
+  return{text,condition:null,outcome:{narrative,stats:stats||{},hidden:hidden||{},flags:flags||{},finances:finances||{},npcEffects:Array.isArray(npcEffects)?npcEffects:(npcEffects?[npcEffects]:[]),triggerEvent:null,achievement:null,...(special||{})}};
 }
 
 var EVENTS=[
@@ -1695,7 +1703,7 @@ function applyOutcome(outcome){
   if(outcome.flags)Object.assign(G.flags,outcome.flags);
   if(outcome._setFlag)outcome._setFlag(G);
   if(outcome.finances)applyFinances(outcome.finances);
-  if(outcome.npcEffects)outcome.npcEffects.forEach(e=>{
+  if(outcome.npcEffects&&Array.isArray(outcome.npcEffects))outcome.npcEffects.forEach(e=>{
     var n=getNPC(e.npcId);
     if(n){if(e.trust!==undefined)n.trust=clamp(n.trust+e.trust,0,100);if(e.closeness!==undefined)n.closeness=clamp(n.closeness+e.closeness,0,100);}
   });
@@ -2972,7 +2980,7 @@ function getShopItems(cat){
     {name:'Mercedes C-Class',icon:'🏎\ufe0f',price:52000},{name:'Porsche 911',icon:'🏎\ufe0f',price:90000},
     {name:'Range Rover',icon:'🛻',price:95000},{name:'Ferrari',icon:'🏎\ufe0f',price:280000},
     {name:'Lamborghini',icon:'🏎\ufe0f',price:350000},{name:'Rolls Royce',icon:'🚘',price:800000},
-  ].filter((_,i)=>i===0||G.finances.netWorth>=(_=>_*0.3)(_=>0)());
+  ];
   if(cat==='watch') return[
     {name:'Casio Digital',icon:'\u231a',price:40},{name:'Seiko Presage',icon:'\u231a',price:350},
     {name:'Tudor Black Bay',icon:'\u231a',price:3500},{name:'Rolex Submariner',icon:'\u231a',price:14000},
@@ -3486,50 +3494,73 @@ setInterval(function(){
    Missing files are silently skipped — only need a few to work.
    ================================================================ */
 
-var YOUTUBE_TRACKS = [
-  {id:'https://israelbabalola049-cmd.github.io/erase.mp3', t:'Cautious Clay - Erase', g:'afrobeats'},
-  {id:'lPe09eE6Xio', t:'Burna Boy \u2014 Ye',                  g:'afrobeat'},
-  {id:'eR3-bHHRKLU', t:'Rema \u2014 Calm Down',                g:'afrobeat'},
-  {id:'YQFk_1-43A4', t:'BJ the Chicago Kid \u2014 Feel The Vibe', g:'fifa'},
-  {id:'PKoaM2e8I6c', t:'Davido \u2014 Fall',                   g:'afrobeat'},
-  {id:'IrjAWNV_bio', t:'Omah Lay \u2014 Bad Influence',         g:'afrobeat'},
-  {id:'ZAH5ZsCQ_Lc', t:'Asake \u2014 Joha',                    g:'afrobeat'},
+var TRACKS = [
+  /* First 9 play in fixed order, then genre-shuffle */
+  {src:['https://israelbabalola049-cmd.github.io/origin-zero/Cautious_Clay_-_Erase.mp3','music/Cautious_Clay_-_Erase_(mp3.pm).mp3'],title:'Cautious Clay — Erase',genre:'fifa'},
+  {src:['https://israelbabalola049-cmd.github.io/origin-zero/feel_the_vibe_bjthechicagokid.mp3','music/BJ_The_Chicago_Kid_feat._Anderson_Paak_-_Feel_The_Vibe_(mp3.pm).mp3'],title:'BJ Chicago Kid — Feel The Vibe',genre:'fifa'},
+  {src:['https://israelbabalola049-cmd.github.io/origin-zero/Tems-Free-Mind-(JustNaija.com).mp3','music/Tems-Free-Mind-(JustNaija.com).mp3'],title:'Tems — Free Mind',genre:'afrobeat'},
+  {src:['https://israelbabalola049-cmd.github.io/origin-zero/WizKid-Ft-Tems-Essence.mp3','music/WizKid-Ft-Tems-Essence.mp3'],title:'Wizkid ft Tems — Essence',genre:'afrobeat'},
+  {src:['https://israelbabalola049-cmd.github.io/origin-zero/Burna-Boy-Ye.mp3','music/Burna-Boy-Ye.mp3'],title:'Burna Boy — Ye',genre:'afrobeat'},
+  {src:['https://israelbabalola049-cmd.github.io/origin-zero/Rema-Calm-Down-file-1-(JustNaija.com).mp3','music/Rema-Calm-Down-file-1-(JustNaija.com).mp3'],title:'Rema — Calm Down',genre:'afrobeat'},
+  {src:['https://israelbabalola049-cmd.github.io/origin-zero/493.Drake、Wizkid、Kyla - One Dance.mp3','music/493.Drake、Wizkid、Kyla - One Dance.mp3'],title:'One Dance — Drake, Wizkid & Kyla',genre:'afrobeat'},
+  {src:['https://israelbabalola049-cmd.github.io/origin-zero/Nokia Drake (pagalall.com).mp3','music/Nokia Drake (pagalall.com).mp3'],title:'Nokia — Drake',genre:'pop'},
+  {src:['https://israelbabalola049-cmd.github.io/origin-zero/ruin-usher.mp3','music/ruin-usher.mp3'],title:'Ruin — Usher ft. Pheelz',genre:'afrobeat'},
   /* ── Pool ── */
-  {id:'tvTRZJ-4EyI', t:'Kendrick Lamar \u2014 HUMBLE.',         g:'hiphop'},
-  {id:'xpVfcZ0ZcFM', t:"Drake \u2014 God's Plan",              g:'hiphop'},
-  {id:'6ONRf7h3Mdk', t:'Travis Scott \u2014 SICKO MODE',        g:'hiphop'},
-  {id:'ZHwVBirqD2s', t:'Kendrick Lamar \u2014 Not Like Us',     g:'hiphop'},
-  {id:'OPf0YbXqDm0', t:'The Weeknd \u2014 Blinding Lights',     g:'pop'},
-  {id:'04854XqcfBg', t:'Harry Styles \u2014 As It Was',         g:'pop'},
-  {id:'92cwKCU8Z5c', t:'Dua Lipa \u2014 Levitating',            g:'pop'},
-  {id:'Us3UHljOTFA', t:'SZA \u2014 Good Days',                  g:'rnb'},
-  {id:'F_56lxrr-3A', t:'Tems \u2014 Damage',                    g:'rnb'},
-  {id:'8BIhn4VFuDE', t:'Daniel Caesar \u2014 Get You',          g:'rnb'},
-  {id:'dX3k_QDnRwo', t:'Glass Animals \u2014 Heat Waves',       g:'fifa'},
-  {id:'ROHN61Q3KdQ', t:'Milky Chance \u2014 Fado',              g:'fifa'},
-  {id:'BacFKGHCLYs', t:'Skepta \u2014 Same Old Story',          g:'fifa'},
-  {id:'3YqWWYhDz3g', t:'Fireboy DML \u2014 Peru',               g:'afrobeat'},
-  {id:'lYwlvZaFiI8', t:'Kizz Daniel \u2014 Buga',               g:'afrobeat'},
+  {src:['https://israelbabalola049-cmd.github.io/origin-zero/Kendrick Lamar - Humble.mp3','music/Kendrick Lamar - Humble.mp3'],title:'Kendrick Lamar — HUMBLE.',genre:'hiphop'},
+  {src:['https://israelbabalola049-cmd.github.io/origin-zero/Drake-Gods-Plan (1).mp3','music/Drake-Gods-Plan (1).mp3'],title:'Drake — God\'s Plan',genre:'hiphop'},
+  {src:['https://israelbabalola049-cmd.github.io/origin-zero/Travis Scott - SICKO MODE ft. Drake.mp3','music/Travis Scott - SICKO MODE ft. Drake.mp3'],title:'Travis Scott — SICKO MODE',genre:'hiphop'},
+  {src:['https://israelbabalola049-cmd.github.io/origin-zero/JACKBOYS_-_Dumbo.mp3','music/Travis_Scott_JACKBOYS_-_Dumbo_(mp3.pm).mp3'],title:'Travis Scott — Dumbo',genre:'hiphop'},
+  {src:['https://israelbabalola049-cmd.github.io/origin-zero/The Weeknd, Playboi Carti, Madonna - Popular.mp3','music/The Weeknd, Playboi Carti, Madonna - Popular (Official Audio).mp3'],title:'Popular — The Weeknd',genre:'pop'},
+  {src:['https://israelbabalola049-cmd.github.io/origin-zero/Skepta_-_Same_Old_Story.mp3','music/Skepta_Joseph_Adenuga_-_Same_Old_Story_(mp3.pm).mp3'],title:'Skepta — Same Old Story',genre:'fifa'},
 ];
 
-var _FIXED_END  = 9;
-var _mOn        = false;
-var _mGo        = false;
-var _mIdx       = 0;
-var _mFixed     = false;
-var _mTimer     = null;
+var _FIXED_COUNT = 9;   /* first 9 tracks play in order */
+var _howl        = null;
+var _mOn         = false;
+var _mGo         = false;
+var _trackIdx    = 0;
+var _playedFixed = false;
+var _skipCount   = 0;
 
-/* Hidden iframe for YouTube audio */
-function _getFrame(){
-  var fr = document.getElementById('yt-frame');
-  if(!fr){
-    fr = document.createElement('iframe');
-    fr.id = 'yt-frame';
-    fr.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:2px;height:2px;border:0;pointer-events:none;z-index:-1';
-    fr.allow = 'autoplay; encrypted-media';
-    document.body.appendChild(fr);
+/* Unlock AudioContext on first user gesture (iOS requirement) */
+(function(){
+  function _unlock(){
+    try{
+      var ctx = Howler.ctx;
+      if(ctx && ctx.state === 'suspended') ctx.resume();
+    }catch(e){}
+    document.removeEventListener('touchend', _unlock);
+    document.removeEventListener('click',    _unlock);
   }
-  return fr;
+  document.addEventListener('touchend', _unlock, {once:true, passive:true});
+  document.addEventListener('click',    _unlock, {once:true});
+})();
+
+/* Resume when returning from background / switching tabs */
+document.addEventListener('visibilitychange', function(){
+  if(document.hidden) return;
+  try{
+    var ctx = Howler.ctx;
+    if(ctx && ctx.state === 'suspended') ctx.resume();
+  }catch(e){}
+  if(_mGo && _howl && !_mOn){
+    try{ _howl.play(); }catch(e){}
+  }
+});
+
+function _nextIdx(){
+  /* Play fixed tracks in order first, then shuffle by genre */
+  if(!_playedFixed && _trackIdx < _FIXED_COUNT - 1) return _trackIdx + 1;
+  _playedFixed = true;
+  var genre = _pickGenre();
+  var pool = [];
+  for(var i = 0; i < TRACKS.length; i++){
+    if(TRACKS[i].genre === genre && i !== _trackIdx) pool.push(i);
+  }
+  if(!pool.length){
+    for(var i = 0; i < TRACKS.length; i++) if(i !== _trackIdx) pool.push(i);
+  }
+  return pool.length ? pool[Math.floor(Math.random() * pool.length)] : 0;
 }
 
 function _pickGenre(){
@@ -3540,72 +3571,70 @@ function _pickGenre(){
   if(cp==='football'||cp==='basketball'||cp==='athletics') return 'fifa';
   if(cp==='afrobeats') return 'afrobeat';
   if(cp==='hiphop')    return 'hiphop';
-  if(cp==='rnb')       return 'rnb';
-  if(happy < 35)       return 'rnb';
+  if(happy < 35)       return 'pop';
   if(c==='Nigeria'||c==='Ghana'||c==='Senegal'||c==='Kenya'||c==='Ethiopia') return 'afrobeat';
   if(c==='United States'||c==='Canada') return Math.random()<0.5?'hiphop':'pop';
-  if(c==='United Kingdom') return Math.random()<0.5?'pop':'rnb';
-  var gs = ['afrobeat','hiphop','pop','rnb','fifa'];
-  return gs[Math.floor(Math.random() * gs.length)];
+  if(c==='United Kingdom') return Math.random()<0.5?'pop':'hiphop';
+  var genres = ['afrobeat','hiphop','pop','fifa'];
+  return genres[Math.floor(Math.random() * genres.length)];
 }
 
-function _nextTrack(){
-  if(!_mFixed && _mIdx < _FIXED_END - 1){
-    _mIdx++;
-    return _mIdx;
+function _playIdx(idx){
+  /* Stop and unload previous track */
+  if(_howl){
+    try{ _howl.stop(); _howl.unload(); }catch(e){}
+    _howl = null;
   }
-  _mFixed = true;
-  var genre = _pickGenre();
-  var pool = [];
-  for(var i = 0; i < YOUTUBE_TRACKS.length; i++){
-    if(YOUTUBE_TRACKS[i].g === genre && i !== _mIdx) pool.push(i);
-  }
-  if(!pool.length){
-    for(var i = 0; i < YOUTUBE_TRACKS.length; i++){
-      if(i !== _mIdx) pool.push(i);
+  _trackIdx = idx;
+  var track  = TRACKS[idx];
+  setSongTitle(track.title);
+
+  _howl = new Howl({
+    src:     [track.src],
+    html5:   true,
+    volume:  0.55,
+    preload: true,
+    format:  ['mp3'],
+    onplay:       function(){ _mOn = true;  _skipCount = 0; _vizActive(true);  _mBtnSync(); },
+    onpause:      function(){ _mOn = false; _vizActive(false); _mBtnSync(); },
+    onstop:       function(){ _mOn = false; _vizActive(false); _mBtnSync(); },
+    onend:        function(){ _mOn = false; if(_mGo) _playIdx(_nextIdx()); },
+    onloaderror:  function(id, err){
+      _skipCount++;
+      setSongTitle('');
+      if(_mGo && _skipCount < TRACKS.length) _playIdx(_nextIdx());
+    },
+    onplayerror:  function(){
+      var self = this;
+      self.once('unlock', function(){ self.play(); });
     }
-  }
-  _mIdx = pool.length ? pool[Math.floor(Math.random() * pool.length)] : 0;
-  return _mIdx;
-}
-
-function _playTrack(idx){
-  var track = YOUTUBE_TRACKS[idx];
-  var fr    = _getFrame();
-  /* autoplay=1 + mute=0 requires prior user gesture — we call this from button click */
-  fr.src = 'https://www.youtube.com/embed/' + track.id +
-           '?autoplay=1&controls=0&rel=0&playsinline=1&modestbranding=1&enablejsapi=1';
-  _mIdx = idx;
-  setSongTitle(track.t);
-  _mOn = true;
-  _vizActive(true);
-  _mBtnSync();
-  /* Auto-advance after ~4 min */
-  if(_mTimer) clearTimeout(_mTimer);
-  _mTimer = setTimeout(function(){
-    if(_mGo) _playTrack(_nextTrack());
-  }, 240000);
+  });
+  _howl.play();
 }
 
 function startMusic(){
   if(_mGo) return;
-  _mGo  = true;
-  _mFixed = false;
-  _mIdx = 0;
-  _playTrack(0);
+  _mGo = true;
+  _playedFixed = false;
+  try{
+    if(Howler.ctx && Howler.ctx.state === 'suspended') Howler.ctx.resume();
+  }catch(e){}
+  _playIdx(0);
 }
 
 function pauseMusic(){
   _mGo = false; _mOn = false;
-  var fr = document.getElementById('yt-frame');
-  if(fr) fr.src = 'about:blank';
-  if(_mTimer) clearTimeout(_mTimer);
+  if(_howl){ try{ _howl.pause(); }catch(e){} }
   _vizActive(false); _mBtnSync();
 }
 
 function resumeMusic(){
   if(!_mGo){ startMusic(); return; }
-  _playTrack(_mIdx);
+  try{
+    if(Howler.ctx && Howler.ctx.state === 'suspended') Howler.ctx.resume();
+  }catch(e){}
+  if(_howl && !_mOn){ try{ _howl.play(); }catch(e){} }
+  else if(!_howl) _playIdx(_trackIdx);
 }
 
 function toggleMusic(){
@@ -3621,34 +3650,34 @@ function setSongTitle(t){
 function _vizActive(on){
   var v = document.getElementById('viz');
   if(!v) return;
-  if(on){ v.classList.add('on'); }
-  else  { v.classList.remove('on'); }
+  if(on) v.classList.add('on');
+  else   v.classList.remove('on');
 }
 
 function _mBtnSync(){
   var b = document.getElementById('mbtn');
   if(!b) return;
   b.innerHTML = _mOn ? '&#9646;&#9646;' : '&#9654;';
-  b.title     = _mOn ? 'Pause' : 'Play';
+  b.title     = _mOn ? 'Pause music' : 'Play music';
 }
 
-/* Called from BEGIN YOUR LIFE button — inside user gesture */
 function giveUp(){
   if(!G) return;
   showModal('End This Life?',
     '<div style="font-size:13px;color:var(--dim);font-style:italic;margin-bottom:18px;line-height:1.8">'+
-    '"'+G.name+'" &mdash; Age '+G.age+'.<br>Everything ends. Even lives we choose to leave.</div>'+
+    '"'+G.name+'" \u2014 Age '+G.age+'.<br>Everything ends. Even lives we choose to leave.</div>'+
     '<div style="display:flex;flex-direction:column;gap:10px">'+
     '<button class="btn btn-s" style="color:var(--danger);border-color:rgba(232,64,64,.5)" onclick="confirmGiveUp()">Yes, end this life</button>'+
     '<button class="btn btn-s" onclick="closeModal()">No, keep going</button>'+
     '</div>');
 }
+
 function confirmGiveUp(){
   closeModal();
   G._causeOfDeath = 'Chose to walk away';
-  G._deathYear = G.world ? G.world.year : 2024;
+  G._deathYear    = G.world ? G.world.year : 2024;
   save(); pauseMusic();
-  setTimeout(function(){renderDeath();}, 350);
+  setTimeout(function(){ renderDeath(); }, 350);
 }
 
 function startMusicAndGame(){
@@ -3659,11 +3688,9 @@ function startMusicAndGame(){
 var _origNewGame = newGame;
 newGame = function(){
   pauseMusic();
-  _mGo = false; _mFixed = false; _mIdx = 0;
+  _mGo = false; _playedFixed = false; _trackIdx = 0;
   _origNewGame();
 };
-
-
 </script>
 
 </body>
