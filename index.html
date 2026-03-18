@@ -3405,14 +3405,22 @@ function startGame(){
 
 function continueGame(){
   var s=loadSave();if(!s){toast('No save found.');return;}
-  G=s;_chainQueue=[];renderStats();
-  // Rebuild log display from saved lifeLog
+  G=s;
+  // Always reset awaiting state on load — prevents permanent age-up freeze
+  G._awaiting=false;
+  G._currentEvent=null;
+  _chainQueue=[];
+  renderStats();
+  // Rebuild log
   document.getElementById('log-list').innerHTML='';
-  G.lifeLog.slice(-40).forEach(e=>renderLogEntry(e.age,e.title,e.category));
+  G.lifeLog.slice(-40).forEach(function(e){renderLogEntry(e.age,e.title,e.category);});
   document.getElementById('log-count').textContent=G.lifeLog.length;
   document.getElementById('event-display').style.display='none';
   document.getElementById('idle-state').style.display='block';
+  // Re-enable age up button
+  var b=document.getElementById('btn-age');if(b)b.disabled=false;
   showScreen('game');
+  toast('Welcome back, '+G.name+'. Age '+G.age+'.');
 }
 
 function newGame(){
@@ -3494,31 +3502,30 @@ setInterval(function(){
    Missing files are silently skipped — only need a few to work.
    ================================================================ */
 
-var TRACKS = [
-  /* First 9 play in fixed order, then genre-shuffle */
-  {gh:'https://israelbabalola049-cmd.github.io/origin-zero/Cautious_Clay_-_Erase.mp3',loc:['music/Cautious_Clay_-_Erase_%28mp3.pm%29.mp3','music/Cautious_Clay_-_Erase.mp3'],title:'Cautious Clay — Erase',genre:'fifa'},
-  {gh:'https://israelbabalola049-cmd.github.io/origin-zero/feel_the_vibe_bjthechicagokid.mp3',loc:['music/BJ_The_Chicago_Kid_feat._Anderson_Paak_-_Feel_The_Vibe_%28mp3.pm%29.mp3','music/feel_the_vibe_bjthechicagokid.mp3'],title:'BJ Chicago Kid — Feel The Vibe',genre:'fifa'},
-  {gh:'https://israelbabalola049-cmd.github.io/origin-zero/Tems-Free-Mind-%28JustNaija.com%29.mp3',loc:['music/Tems-Free-Mind-%28JustNaija.com%29.mp3'],title:'Tems — Free Mind',genre:'afrobeat'},
-  {gh:'https://israelbabalola049-cmd.github.io/origin-zero/WizKid-Ft-Tems-Essence.mp3',loc:['music/WizKid-Ft-Tems-Essence.mp3'],title:'Wizkid ft Tems — Essence',genre:'afrobeat'},
-  {gh:'https://israelbabalola049-cmd.github.io/origin-zero/Burna-Boy-Ye.mp3',loc:['music/Burna-Boy-Ye.mp3'],title:'Burna Boy — Ye',genre:'afrobeat'},
-  {gh:'https://israelbabalola049-cmd.github.io/origin-zero/Rema-Calm-Down-file-1-%28JustNaija.com%29.mp3',loc:['music/Rema-Calm-Down-file-1-%28JustNaija.com%29.mp3'],title:'Rema — Calm Down',genre:'afrobeat'},
-  {gh:'https://israelbabalola049-cmd.github.io/origin-zero/493.Drake%E3%80%81Wizkid%E3%80%81Kyla%20-%20One%20Dance.mp3',loc:['music/493.Drake%E3%80%81Wizkid%E3%80%81Kyla%20-%20One%20Dance.mp3'],title:'One Dance — Drake, Wizkid & Kyla',genre:'afrobeat'},
-  {gh:'https://israelbabalola049-cmd.github.io/origin-zero/Nokia%20Drake%20%28pagalall.com%29.mp3',loc:['music/Nokia%20Drake%20%28pagalall.com%29.mp3'],title:'Nokia — Drake',genre:'pop'},
-  {gh:'https://israelbabalola049-cmd.github.io/origin-zero/ruin-usher.mp3',loc:['music/ruin-usher.mp3'],title:'Ruin — Usher ft. Pheelz',genre:'afrobeat'},
-  /* ── Pool ── */
-  {gh:'https://israelbabalola049-cmd.github.io/origin-zero/Kendrick%20Lamar%20-%20Humble.mp3',loc:['music/Kendrick%20Lamar%20-%20Humble.mp3'],title:'Kendrick Lamar — HUMBLE.',genre:'hiphop'},
-  {gh:'https://israelbabalola049-cmd.github.io/origin-zero/Drake-Gods-Plan%20%281%29.mp3',loc:['music/Drake-Gods-Plan%20%281%29.mp3'],title:'Drake — God\'s Plan',genre:'hiphop'},
-  {gh:'https://israelbabalola049-cmd.github.io/origin-zero/Travis%20Scott%20-%20SICKO%20MODE%20ft.%20Drake.mp3',loc:['music/Travis%20Scott%20-%20SICKO%20MODE%20ft.%20Drake.mp3'],title:'Travis Scott — SICKO MODE',genre:'hiphop'},
-  {gh:'https://israelbabalola049-cmd.github.io/origin-zero/JACKBOYS_-_Dumbo.mp3',loc:['music/Travis_Scott_JACKBOYS_-_Dumbo_%28mp3.pm%29.mp3','music/JACKBOYS_-_Dumbo.mp3'],title:'Travis Scott — Dumbo',genre:'hiphop'},
-  {gh:'https://israelbabalola049-cmd.github.io/origin-zero/The%20Weeknd%2C%20Playboi%20Carti%2C%20Madonna%20-%20Popular.mp3',loc:['music/The%20Weeknd%2C%20Playboi%20Carti%2C%20Madonna%20-%20Popular%20%28Official%20Audio%29.mp3','music/The%20Weeknd%2C%20Playboi%20Carti%2C%20Madonna%20-%20Popular.mp3'],title:'Popular — The Weeknd',genre:'pop'},
-  {gh:'https://israelbabalola049-cmd.github.io/origin-zero/Skepta_-_Same_Old_Story.mp3',loc:['music/Skepta_Joseph_Adenuga_-_Same_Old_Story_%28mp3.pm%29.mp3','music/Skepta_-_Same_Old_Story.mp3'],title:'Skepta — Same Old Story',genre:'fifa'},
-];
-
 var _IS_GITHUB = window.location.hostname === 'israelbabalola049-cmd.github.io';
-/* Pick the right src for this environment */
-var TRACK_LIST = TRACKS.map(function(t){
-  return {src: _IS_GITHUB ? t.gh : t.loc, title: t.title, genre: t.genre};
-});
+var TRACK_LIST = (function(){
+  var defs = [
+    /* [title, genre, gh_src, local_src] */
+    ['Cautious Clay — Erase','fifa','Cautious_Clay_-_Erase.mp3','music/Cautious_Clay_-_Erase_%28mp3.pm%29.mp3'],
+    ['BJ Chicago Kid — Feel The Vibe','fifa','feel_the_vibe_bjthechicagokid.mp3','music/BJ_The_Chicago_Kid_feat._Anderson_Paak_-_Feel_The_Vibe_%28mp3.pm%29.mp3'],
+    ['Tems — Free Mind','afrobeat','Tems-Free-Mind-%28JustNaija.com%29.mp3','music/Tems-Free-Mind-%28JustNaija.com%29.mp3'],
+    ['Wizkid ft Tems — Essence','afrobeat','WizKid-Ft-Tems-Essence.mp3','music/WizKid-Ft-Tems-Essence.mp3'],
+    ['Burna Boy — Ye','afrobeat','Burna-Boy-Ye.mp3','music/Burna-Boy-Ye.mp3'],
+    ['Rema — Calm Down','afrobeat','Rema-Calm-Down-file-1-%28JustNaija.com%29.mp3','music/Rema-Calm-Down-file-1-%28JustNaija.com%29.mp3'],
+    ['One Dance — Drake, Wizkid & Kyla','afrobeat','493.Drake%E3%80%81Wizkid%E3%80%81Kyla%20-%20One%20Dance.mp3','music/493.Drake%E3%80%81Wizkid%E3%80%81Kyla%20-%20One%20Dance.mp3'],
+    ['Nokia — Drake','pop','Nokia%20Drake%20%28pagalall.com%29.mp3','music/Nokia%20Drake%20%28pagalall.com%29.mp3'],
+    ['Ruin — Usher ft. Pheelz','afrobeat','ruin-usher.mp3','music/ruin-usher.mp3'],
+    ['Kendrick Lamar — HUMBLE.','hiphop','Kendrick%20Lamar%20-%20Humble.mp3','music/Kendrick%20Lamar%20-%20Humble.mp3'],
+    ['Drake — God\'s Plan','hiphop','Drake-Gods-Plan%20%281%29.mp3','music/Drake-Gods-Plan%20%281%29.mp3'],
+    ['Travis Scott — SICKO MODE','hiphop','Travis%20Scott%20-%20SICKO%20MODE%20ft.%20Drake.mp3','music/Travis%20Scott%20-%20SICKO%20MODE%20ft.%20Drake.mp3'],
+    ['Travis Scott — Dumbo','hiphop','JACKBOYS_-_Dumbo.mp3','music/Travis_Scott_JACKBOYS_-_Dumbo_%28mp3.pm%29.mp3'],
+    ['Popular — The Weeknd','pop','The%20Weeknd%2C%20Playboi%20Carti%2C%20Madonna%20-%20Popular.mp3','music/The%20Weeknd%2C%20Playboi%20Carti%2C%20Madonna%20-%20Popular%20%28Official%20Audio%29.mp3'],
+    ['Skepta — Same Old Story','fifa','Skepta_-_Same_Old_Story.mp3','music/Skepta_Joseph_Adenuga_-_Same_Old_Story_%28mp3.pm%29.mp3'],
+  ];
+  return defs.map(function(d){
+    return {src: _IS_GITHUB ? d[2] : d[3], title: d[0], genre: d[1]};
+  });
+})();
 
 var _FIXED_COUNT = 9;   /* first 9 tracks play in order */
 var _howl        = null;
